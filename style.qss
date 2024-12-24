@@ -1,0 +1,65 @@
+/* 主窗口背景 */
+QWidget {
+    background-color: #f8f9fa; /* 浅灰色背景 */
+    font-family: "Arial", sans-serif;
+    font-size: 30px;
+    color: #343a40; /* 深灰色字体 */
+}
+
+/* QLabel 样式 */
+QLabel {
+    color: #495057; /* 字体颜色 */
+    font-size: 30px;
+}
+
+/* QLineEdit 样式 */
+QLineEdit {
+    border: 1px solid #ced4da; /* 边框颜色 */
+    border-radius: 4px;
+    padding: 4px;
+    background-color: #ffffff; /* 背景色 */
+    color: #495057;
+}
+
+QLineEdit:focus {
+    border: 1px solid #5c9ded; /* 聚焦时的边框颜色 */
+    background-color: #eef7ff; /* 聚焦时的背景色 */
+}
+
+/* QPushButton 样式 */
+QPushButton {
+    border: 1px solid #007bff; /* 边框颜色 */
+    border-radius: 4px;
+    background-color: #007bff; /* 背景色 */
+    color: white; /* 字体颜色 */
+    padding: 6px 12px;
+}
+
+QPushButton:hover {
+    background-color: #0056b3; /* 悬停时的背景色 */
+}
+
+QPushButton:pressed {
+    background-color: #003f7f; /* 点击时的背景色 */
+}
+
+/* QComboBox 样式 */
+QComboBox {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 4px;
+    background-color: #ffffff;
+    color: #495057;
+}
+
+QComboBox QAbstractItemView {
+    border: 1px solid #ced4da;
+    selection-background-color: #5c9ded; /* 选中项的背景色 */
+    selection-color: white; /* 选中项的字体颜色 */
+}
+
+#widget_4 {
+    border: 3px solid #d6d6d6; /* 边框颜色 */
+    border-radius: 8px; /* 圆角效果 */
+    padding: 10px; /* 内间距，确保内容不贴边 */
+}

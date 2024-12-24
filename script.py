@@ -3,83 +3,10 @@
 日期：2024年12月22日
 """
 import os.path
-import time
-
-import cv2
-import win32con
-import win32gui
-import win32print
-import win32api
-from win32api import GetSystemMetrics
-import pynput
 import pyautogui
-import numpy as np
 from paddleocr import PaddleOCR
-from PIL import Image, ImageGrab
 from key_words import *
-from log import logger
-
-
-def saveScreen(img_name):
-    scr_shot = ImageGrab.grab()
-    scr_shot = np.array(scr_shot)
-    cv2.imwrite(img_name, cv2.cvtColor(scr_shot, cv2.COLOR_RGB2BGR))
-
-
-def getScaling():
-    soft_width = GetSystemMetrics(0)
-    screen_width = win32print.GetDeviceCaps(win32gui.GetDC(0), win32con.DESKTOPHORZRES)
-    scaling = round(screen_width / soft_width * 100) / 100
-    return scaling
-
-
-def getWindowLocation(title='MuMU模拟器12'):
-    hwnd = win32gui.FindWindow(None, title)
-    if hwnd == 0:
-        logger.error('游戏没开，或窗口名称错误')
-        exit(0)
-    else:
-        try:
-            # 发送还原最小化窗口的信息
-            win32gui.SendMessage(hwnd, win32con.WM_SYSCOMMAND, win32con.SC_RESTORE, 0)
-            time.sleep(0.1)
-            # 设为高亮
-            win32gui.SetForegroundWindow(hwnd)
-        finally:
-            left, top, right, bottom = win32gui.GetWindowRect(hwnd)
-            return hwnd, (left, top, right, bottom)
-
-
-def zoomOut(kb, ms, midPos, times=10000):
-    # press ctrl with kb
-    kb.press(pynput.keyboard.Key.ctrl)
-    time.sleep(0.01)
-    ms.position = midPos
-    time.sleep(0.01)
-    for _ in range(times):
-        win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, -1)
-    time.sleep(0.01)
-    kb.release(pynput.keyboard.Key.ctrl)
-
-
-def moveThenClick(ms, pos, duration=0.1):
-    ms.position = pos
-    time.sleep(duration)
-    ms.click(pynput.mouse.Button.left)
-
-
-def getMidCoordinate(window_loc, template, scr_shot=None, threshold=0.95):
-    if scr_shot is None:
-        scr_shot = ImageGrab.grab(window_loc)
-        scr_shot = np.array(scr_shot)
-    res = cv2.matchTemplate(scr_shot, template, cv2.TM_CCOEFF_NORMED)
-    _, max_val, _, max_loc = cv2.minMaxLoc(res)
-    # print(max_val)
-    if max_val < threshold:
-        return None
-    else:
-        x, y = max_loc
-        return window_loc[0] + x + template.shape[1] // 2, window_loc[1] + y + template.shape[0] // 2
+from utils import *
 
 
 def collect(kb, ms, window_loc, templates):
@@ -128,7 +55,7 @@ def getAttackPos(window_loc, ocr):
         if '进攻' in line[1][0]:
             four_corner = line[0]
             mid_point = (
-            round((four_corner[0][0] + four_corner[1][0]) / 2), round((four_corner[0][1] + four_corner[2][1]) / 2))
+                round((four_corner[0][0] + four_corner[1][0]) / 2), round((four_corner[0][1] + four_corner[2][1]) / 2))
             attack_pos = (left + mid_point[0], top + mid_point[1] + round(1 / 2 * h))
             return attack_pos
     return None
@@ -152,25 +79,6 @@ def waitUntilMatch(ocr, window_loc, time_limit=10.0):
         for line in result[0]:
             if '进攻' in line[1][0]:
                 return True
-
-
-def matchThenClick(ms, template, window_loc):
-    pos = getMidCoordinate(window_loc, template)
-    if pos:
-        moveThenClick(ms, pos)
-        time.sleep(1)
-        return True
-    return False
-
-
-def logThenExit(msg, img_name, quit=True):
-    if quit:
-        logger.critical(msg)
-    else:
-        logger.warning(msg)
-    saveScreen(img_name)
-    if quit:
-        exit(0)
 
 
 def attack(kb, ms, window_loc, ocr, templates, unit, number):
@@ -221,9 +129,9 @@ def attack(kb, ms, window_loc, ocr, templates, unit, number):
         time.sleep(0.2)
         moveThenClick(ms, place_arms_pos)
         time.sleep(0.2)
-    dragon_pos = getMidCoordinate(window_loc, templates[f'{unit}'], scr_shot)
+    dragon_pos = getMidCoordinate(window_loc, templates[f'{unit[1]}'], scr_shot)
     if dragon_pos:
-        logger.info(f'放{unit}')
+        logger.info(f'放{unit[0]}')
         moveThenClick(ms, dragon_pos)
         time.sleep(0.2)
         ms.position = place_arms_pos
@@ -257,7 +165,7 @@ def attack(kb, ms, window_loc, ocr, templates, unit, number):
         time.sleep(5)
 
 
-def main(collect_interval=4, execute_time=3, unit='龙', number=4):
+def main(collect_interval=4, execute_time=3.0, unit='龙', number=4):
     """
     :param collect_interval: 收集间隔（场）
     :param execute_time: 执行时间（小时）
@@ -296,7 +204,7 @@ def main(collect_interval=4, execute_time=3, unit='龙', number=4):
     while True:
         for _ in range(collect_interval):  # 每打collect_interval场战斗，就收集一次圣水
             zoomOut(keyboard, mouse, ((left + right) // 2, (top + bottom) // 2))  # 缩小视野至最小
-            attack(keyboard, mouse, window_loc, ocr, templates, units[unit], number)  # 进攻
+            attack(keyboard, mouse, window_loc, ocr, templates, (unit, units[unit]), number)  # 进攻
             time.sleep(6)
             logger.info('检查胜利之星')
             matchThenClick(mouse, templates['victory_star'], window_loc)  # 检查是否弹出胜利之星奖励
