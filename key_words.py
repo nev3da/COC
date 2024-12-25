@@ -12,9 +12,9 @@ RESOURCE_DIR = 'resource_imgs'
 TIME_LIMIT = 180
 
 UNITS = {
-            '龙': 'dragon',
-            '女巫': 'witch',
-        }
+    '龙': 'dragon',
+    '女巫': 'witch',
+}
 TEMPLATES = {
     'search': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'search.png')), cv2.COLOR_BGR2RGB),
     'endfight': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'endfight.png')), cv2.COLOR_BGR2RGB),
@@ -24,6 +24,7 @@ TEMPLATES = {
     'cancel': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'cancel.png')), cv2.COLOR_BGR2RGB),
     'war_machine': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'warmachine.png')), cv2.COLOR_BGR2RGB),
     'dragon': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'dragon.png')), cv2.COLOR_BGR2RGB),
+    'witch': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'witch.png')), cv2.COLOR_BGR2RGB),
     'skill': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'skill.png')), cv2.COLOR_BGR2RGB),
     'elixir1': cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'elixir1.png')), cv2.COLOR_BGR2RGB),
     'elixir2': cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'elixir2.png')), cv2.COLOR_BGR2RGB),
