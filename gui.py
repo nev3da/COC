@@ -23,6 +23,7 @@ import pynput
 
 class ScriptThread(QThread):
     finished = pyqtSignal()
+
     def __init__(self, window_name, collect_interval=4, execute_time=3.0, unit='龙', number=4):
         super(ScriptThread, self).__init__()
         self.window_name = window_name
@@ -75,8 +76,11 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
                 self.begin()
             else:
                 event.set()
-                self.btn.setText('等待结束')
-                self.btn.setEnabled(False)
+                if self.thread.isFinished():
+                    self.btn.setText('开始')
+                else:
+                    self.btn.setText('等待结束')
+                    self.btn.setEnabled(False)
 
         self.btn.clicked.connect(scriptEvent)
         self.setWindowIcon(QIcon("avatar.ico"))
@@ -91,7 +95,7 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
         self.thread = ScriptThread(window_name, collect_interval, execute_time, unit, number)
         self.thread.finished.connect(self.finished)
         self.thread.start()
-    
+
     def finished(self):
         self.btn.setText('开始')
         self.btn.setEnabled(True)
