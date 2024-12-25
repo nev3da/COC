@@ -98,7 +98,7 @@ def attack(kb, ms, window_loc, ocr, templates, unit, number):
                 find = True
                 break
             else:  # 规定时间内未找到对手
-                logger.info(f'规定时间内没匹配到，退出重新搜索对手：[{i + 1}/{search_times}]')
+                logger.warning(f'规定时间内没匹配到，退出重新搜索对手：[{i + 1}/{search_times}]')
                 if not matchThenClick(ms, templates['cancel'], window_loc):
                     logThenExit('未找到取消按钮', 'no_cancel.png')
             time.sleep(3)
@@ -129,16 +129,20 @@ def attack(kb, ms, window_loc, ocr, templates, unit, number):
         time.sleep(0.2)
         moveThenClick(ms, place_arms_pos)
         time.sleep(0.2)
-    dragon_pos = getMidCoordinate(window_loc, templates[f'{unit[1]}'], scr_shot)
-    if dragon_pos:
+    arm_pos = getMidCoordinate(window_loc, templates[f'{unit[1]}'], scr_shot)
+    if arm_pos:
         logger.info(f'放{unit[0]}')
-        moveThenClick(ms, dragon_pos)
+        moveThenClick(ms, arm_pos)
         time.sleep(0.2)
         ms.position = place_arms_pos
         time.sleep(0.2)
         for _ in range(number):
             ms.click(pynput.mouse.Button.left)
             time.sleep(0.2)
+    if unit[0] == '女巫':
+        logger.info('女巫放技能')
+        for _ in range(number):
+            matchThenClick(ms, templates['skill'], window_loc, mid=False)
     ms.position = mid_pos  # 鼠标移动到中心
     while True:  # 等待战斗结束
         logger.info(f'等待战斗结束：[{time.time() - start_time:.2f}/{TIME_LIMIT:.2f}]')
@@ -180,35 +184,18 @@ def main(collect_interval=4, execute_time=3.0, unit='龙', number=4):
     mouse = pynput.mouse.Controller()
     window_loc = getWindowLocation(title='MuMu模拟器12')[1]
     left, top, right, bottom = window_loc
-    units = {
-        '龙': 'dragon',
-        '女巫': 'witch',
-    }
-    templates = {
-        'search': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'search.png')), cv2.COLOR_BGR2RGB),
-        'endfight': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'endfight.png')), cv2.COLOR_BGR2RGB),
-        'confirm': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'confirm.png')), cv2.COLOR_BGR2RGB),
-        'backhome': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'backhome.png')), cv2.COLOR_BGR2RGB),
-        'victory_star': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'victory_star.png')), cv2.COLOR_BGR2RGB),
-        'cancel': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'cancel.png')), cv2.COLOR_BGR2RGB),
-        'war_machine': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'warmachine.png')), cv2.COLOR_BGR2RGB),
-        'dragon': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'dragon.png')), cv2.COLOR_BGR2RGB),
-        'elixir1': cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'elixir1.png')), cv2.COLOR_BGR2RGB),
-        'elixir2': cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'elixir2.png')), cv2.COLOR_BGR2RGB),
-        'collect': cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'collect.png')), cv2.COLOR_BGR2RGB),
-        'close': cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'close.png')), cv2.COLOR_BGR2RGB),
-    }
+
     execute_time *= (60 * 60)
     start_time = time.time()
 
     while True:
         for _ in range(collect_interval):  # 每打collect_interval场战斗，就收集一次圣水
             zoomOut(keyboard, mouse, ((left + right) // 2, (top + bottom) // 2))  # 缩小视野至最小
-            attack(keyboard, mouse, window_loc, ocr, templates, (unit, units[unit]), number)  # 进攻
+            attack(keyboard, mouse, window_loc, ocr, TEMPLATES, (unit, UNITS[unit]), number)  # 进攻
             time.sleep(6)
             logger.info('检查胜利之星')
-            matchThenClick(mouse, templates['victory_star'], window_loc)  # 检查是否弹出胜利之星奖励
-        collect(keyboard, mouse, window_loc, templates)  # 收集圣水
+            matchThenClick(mouse, TEMPLATES['victory_star'], window_loc)  # 检查是否弹出胜利之星奖励
+        collect(keyboard, mouse, window_loc, TEMPLATES)  # 收集圣水
         if time.time() - start_time >= execute_time:  # 判断是否到达执行时间，
             break
 

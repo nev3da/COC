@@ -4,7 +4,7 @@
 """
 from loguru import logger
 
-logger.add("log/log_{time}.log", format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {message}", rotation="200 MB")
+logger.add("log/log_{time}.log", format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {message}", rotation="2 MB")
 
 if __name__ == "__main__":
     logger.debug("This is a debug message")

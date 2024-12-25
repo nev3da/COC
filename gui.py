@@ -36,24 +36,6 @@ class ScriptThread(QThread):
         keyboard = pynput.keyboard.Controller()
         mouse = pynput.mouse.Controller()
         window_loc = getWindowLocation(self.window_name)[1]
-        units = {
-            '龙': 'dragon',
-            '女巫': 'witch',
-        }
-        templates = {
-            'search': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'search.png')), cv2.COLOR_BGR2RGB),
-            'endfight': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'endfight.png')), cv2.COLOR_BGR2RGB),
-            'confirm': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'confirm.png')), cv2.COLOR_BGR2RGB),
-            'backhome': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'backhome.png')), cv2.COLOR_BGR2RGB),
-            'victory_star': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'victory_star.png')), cv2.COLOR_BGR2RGB),
-            'cancel': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'cancel.png')), cv2.COLOR_BGR2RGB),
-            'war_machine': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'warmachine.png')), cv2.COLOR_BGR2RGB),
-            'dragon': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'dragon.png')), cv2.COLOR_BGR2RGB),
-            'elixir1': cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'elixir1.png')), cv2.COLOR_BGR2RGB),
-            'elixir2': cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'elixir2.png')), cv2.COLOR_BGR2RGB),
-            'collect': cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'collect.png')), cv2.COLOR_BGR2RGB),
-            'close': cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'close.png')), cv2.COLOR_BGR2RGB),
-        }
         left, top, right, bottom = window_loc
         start_time = time.time()
 
@@ -61,19 +43,20 @@ class ScriptThread(QThread):
             for _ in range(self.collect_interval):  # 每打collect_interval场战斗，就收集一次圣水
                 zoomOut(keyboard, mouse, ((left + right) // 2, (top + bottom) // 2))  # 缩小视野至最小
                 attack(keyboard, mouse, window_loc, ocr,
-                       templates, (self.unit, units[self.unit]), self.number)  # 进攻
+                       TEMPLATES, (self.unit, UNITS[self.unit]), self.number)  # 进攻
                 if event.is_set():
                     break
                 time.sleep(6)
                 logger.info('检查胜利之星')
-                matchThenClick(mouse, templates['victory_star'], window_loc)  # 检查是否弹出胜利之星奖励
+                matchThenClick(mouse, TEMPLATES['victory_star'], window_loc)  # 检查是否弹出胜利之星奖励
             if event.is_set():
                 logger.success('已手动停止')
                 self.finished.emit()
                 break
-            collect(keyboard, mouse, window_loc, templates)  # 收集圣水
+            collect(keyboard, mouse, window_loc, TEMPLATES)  # 收集圣水
             if time.time() - start_time >= self.execute_time:  # 判断是否到达执行时间，
                 logger.success('已到达执行时间')
+                self.finished.emit()
                 break
 
 
