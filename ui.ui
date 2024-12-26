@@ -280,6 +280,11 @@
               <string>女巫</string>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string>变异亡灵</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item>

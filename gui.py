@@ -40,25 +40,26 @@ class ScriptThread(QThread):
         left, top, right, bottom = window_loc
         start_time = time.time()
 
-        while True:
-            for _ in range(self.collect_interval):  # 每打collect_interval场战斗，就收集一次圣水
-                zoomOut(keyboard, mouse, ((left + right) // 2, (top + bottom) // 2))  # 缩小视野至最小
-                attack(keyboard, mouse, window_loc, ocr,
-                       TEMPLATES, (self.unit, UNITS[self.unit]), self.number)  # 进攻
+        try:
+            while True:
+                for _ in range(self.collect_interval):  # 每打collect_interval场战斗，就收集一次圣水
+                    zoomOut(keyboard, mouse, ((left + right) // 2, (top + bottom) // 2))  # 缩小视野至最小
+                    attack(keyboard, mouse, window_loc, ocr,
+                        TEMPLATES, (self.unit, UNITS[self.unit]), self.number)  # 进攻
+                    if event.is_set():
+                        break
+                    time.sleep(6)
+                    logger.info('检查胜利之星')
+                    matchThenClick(mouse, TEMPLATES['victory_star'], window_loc)  # 检查是否弹出胜利之星奖励
                 if event.is_set():
+                    logger.success('已手动停止')
                     break
-                time.sleep(6)
-                logger.info('检查胜利之星')
-                matchThenClick(mouse, TEMPLATES['victory_star'], window_loc)  # 检查是否弹出胜利之星奖励
-            if event.is_set():
-                logger.success('已手动停止')
-                self.finished.emit()
-                break
-            collect(keyboard, mouse, window_loc, TEMPLATES)  # 收集圣水
-            if time.time() - start_time >= self.execute_time:  # 判断是否到达执行时间，
-                logger.success('已到达执行时间')
-                self.finished.emit()
-                break
+                collect(keyboard, mouse, window_loc, TEMPLATES)  # 收集圣水
+                if time.time() - start_time >= self.execute_time:  # 判断是否到达执行时间，
+                    logger.success('已到达执行时间')
+                    break
+        finally:
+            self.finished.emit()
 
 
 class MainUi(QMainWindow, ui.Ui_MainWindow):

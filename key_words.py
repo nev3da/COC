@@ -14,6 +14,7 @@ TIME_LIMIT = 180
 UNITS = {
     '龙': 'dragon',
     '女巫': 'witch',
+    '变异亡灵': 'fly',
 }
 TEMPLATES = {
     'search': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'search.png')), cv2.COLOR_BGR2RGB),
@@ -25,6 +26,7 @@ TEMPLATES = {
     'war_machine': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'warmachine.png')), cv2.COLOR_BGR2RGB),
     'dragon': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'dragon.png')), cv2.COLOR_BGR2RGB),
     'witch': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'witch.png')), cv2.COLOR_BGR2RGB),
+    'fly': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'fly.png')), cv2.COLOR_BGR2RGB),
     'skill': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'skill.png')), cv2.COLOR_BGR2RGB),
     'elixir1': cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'elixir1.png')), cv2.COLOR_BGR2RGB),
     'elixir2': cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'elixir2.png')), cv2.COLOR_BGR2RGB),
