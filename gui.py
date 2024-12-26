@@ -77,11 +77,8 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
                 self.begin()
             else:
                 event.set()
-                if self.thread.isFinished():
-                    self.btn.setText('开始')
-                else:
-                    self.btn.setText('等待结束')
-                    self.btn.setEnabled(False)
+                self.btn.setText('等待结束')
+                self.btn.setEnabled(False)
 
         self.btn.clicked.connect(scriptEvent)
         self.setWindowIcon(QIcon("avatar.ico"))
