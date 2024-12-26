@@ -97,6 +97,7 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
     def finished(self):
         self.btn.setText('开始')
         self.btn.setEnabled(True)
+        self.thread.quit()
 
 
 if __name__ == '__main__':
