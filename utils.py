@@ -88,6 +88,19 @@ def getBottomCoordinate(window_loc, template, scr_shot=None, threshold=0.95):
     else:
         x, y = max_loc
         return window_loc[0] + x + template.shape[1] // 2, window_loc[1] + y + template.shape[0]
+    
+def getTopCoordinate(window_loc, template, scr_shot=None, threshold=0.95):
+    if scr_shot is None:
+        scr_shot = ImageGrab.grab(window_loc)
+        scr_shot = np.array(scr_shot)
+    res = cv2.matchTemplate(scr_shot, template, cv2.TM_CCOEFF_NORMED)
+    _, max_val, _, max_loc = cv2.minMaxLoc(res)
+    # print(max_val)
+    if max_val < threshold:
+        return None
+    else:
+        x, y = max_loc
+        return window_loc[0] + x + template.shape[1] // 2, window_loc[1] + y
 
 
 def matchThenClick(ms, template, window_loc, mid=True):

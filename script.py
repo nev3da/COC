@@ -133,7 +133,7 @@ def attack(kb, ms, window_loc, ocr, templates, unit, number):
             time.sleep(0.2)
             moveThenClick(ms, place_arms_pos)
             time.sleep(0.2)
-        arm_pos = getMidCoordinate(window_loc, templates[f'{unit[1]}'], scr_shot)
+        arm_pos = getTopCoordinate(window_loc, templates[f'{unit[1]}'], scr_shot)
         if arm_pos:
             logger.info(f'放{unit[0]}')
             moveThenClick(ms, arm_pos)
