@@ -69,7 +69,7 @@ def getMidCoordinate(window_loc, template, scr_shot=None, threshold=0.95):
         scr_shot = np.array(scr_shot)
     res = cv2.matchTemplate(scr_shot, template, cv2.TM_CCOEFF_NORMED)
     _, max_val, _, max_loc = cv2.minMaxLoc(res)
-    # print(max_val)
+    print(max_val)
     if max_val < threshold:
         return None
     else:

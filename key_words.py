@@ -9,8 +9,6 @@ ARM_DIR = 'arm_imgs'
 CONTROL_DIR = 'control_imgs'
 RESOURCE_DIR = 'resource_imgs'
 
-TIME_LIMIT = 140
-
 UNITS = {
     '龙': 'dragon',
     '女巫': 'witch',
