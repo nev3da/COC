@@ -22,19 +22,22 @@ def collect(kb, ms, window_loc, templates):
         pyautogui.mouseUp()
     time.sleep(1)
     logger.info('识别圣水车')
-    wheelbarrow_pos = getMidCoordinate(window_loc, templates['elixir1'], threshold=0.8)
-    if not wheelbarrow_pos:
-        wheelbarrow_pos = getMidCoordinate(window_loc, templates['elixir2'], threshold=0.8)
+    while True:
+        wheelbarrow_pos = getMidCoordinate(window_loc, templates['elixir1'], threshold=0.8)
         if not wheelbarrow_pos:
-            logThenExit('未找到圣水车', 'no_wheelbarrow.png', quit=False)
-            return
-    moveThenClick(ms, wheelbarrow_pos)
-    time.sleep(1)
-    logger.info('识别收集和关闭按钮')
+            wheelbarrow_pos = getMidCoordinate(window_loc, templates['elixir2'], threshold=0.8)
+            if not wheelbarrow_pos:
+                logger.warning('未找到圣水车')
+                return
+        moveThenClick(ms, wheelbarrow_pos)
+        time.sleep(1)
+        logger.info('识别收集和关闭按钮')
+        close_pos = getMidCoordinate(window_loc, templates['close'])
+        if not close_pos:
+            logger.info('识别到了圣水瓶，重新识别圣水车')
+        else:
+            break
     collect_pos = getMidCoordinate(window_loc, templates['collect'])
-    close_pos = getMidCoordinate(window_loc, templates['close'])
-    if not close_pos:
-        logThenExit('未找到关闭按钮', 'no_close.png')
     if collect_pos:  # 如果找到收集按钮就点一下，没找到可能是因为圣水满了，收集按钮变灰，识别不到，所以直接点关闭
         logger.info('收集')
         moveThenClick(ms, collect_pos)
@@ -201,16 +204,16 @@ def main(collect_interval=4, execute_time=3.0, unit='龙', number=4):
 
 
 if __name__ == '__main__':
-    main()
-    # keyboard = pynput.keyboard.Controller()
-    # mouse = pynput.mouse.Controller()
-    # left, top, right, bottom = getWindowLocation(title='MuMu模拟器12')[1]
-    # time.sleep(1)
-    # template = cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'elixir2.png')), cv2.COLOR_BGR2RGB)
-    # src = ImageGrab.grab((left, top, right, bottom))
-    # src = np.array(src)
-    # pos = getMidCoordinate((left, top, right, bottom), template, src)
-    # if pos:
-    #     mouse.position = pos
-    # else:
-    #     print('未找到')
+    # main()
+    keyboard = pynput.keyboard.Controller()
+    mouse = pynput.mouse.Controller()
+    left, top, right, bottom = getWindowLocation(title='MuMu模拟器12')[1]
+    time.sleep(1)
+    template = cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'close.png')), cv2.COLOR_BGR2RGB)
+    src = ImageGrab.grab((left, top, right, bottom))
+    src = np.array(src)
+    pos = getMidCoordinate((left, top, right, bottom), template, src)
+    if pos:
+        mouse.position = pos
+    else:
+        print('未找到')
