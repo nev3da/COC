@@ -116,7 +116,7 @@ def attack(kb, ms, window_loc, ocr, templates, unit, number):
     mid_pos = ((left + right) // 2, (top + bottom) // 2)
     place_arms_pos = (mid_pos[0], top + 755)
     zoomOut(kb, ms, mid_pos)
-    def placeArms():
+    def placeArms(arm_num):
         scr_shot = ImageGrab.grab(window_loc)
         scr_shot = np.array(scr_shot)
         for _ in range(4):  # 屏幕下移
@@ -148,7 +148,7 @@ def attack(kb, ms, window_loc, ocr, templates, unit, number):
             for _ in range(number):
                 matchThenClick(ms, templates['skill'], window_loc, mid=False)
         ms.position = mid_pos  # 鼠标移动到中心
-    placeArms()
+    placeArms(number)
     second_phase = False
     while True:  # 等待战斗结束
         if matchThenClick(ms, templates['backhome'], window_loc):
@@ -167,7 +167,7 @@ def attack(kb, ms, window_loc, ocr, templates, unit, number):
         time.sleep(5)
     logger.info('进入二阶段')
     time.sleep(2)
-    placeArms()
+    placeArms(number + 1)
     while True:  # 等待战斗结束
         if matchThenClick(ms, templates['backhome'], window_loc):
             logger.info('回营')
