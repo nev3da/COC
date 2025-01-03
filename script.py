@@ -140,7 +140,7 @@ def attack(kb, ms, window_loc, ocr, templates, unit, number):
             time.sleep(0.2)
             ms.position = place_arms_pos
             time.sleep(0.2)
-            for _ in range(number):
+            for _ in range(arm_num):
                 ms.click(pynput.mouse.Button.left)
                 time.sleep(0.2)
         if unit[0] == '女巫':
