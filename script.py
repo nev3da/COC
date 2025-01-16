@@ -167,7 +167,7 @@ def attack(kb, ms, window_loc, ocr, templates, unit, number):
         time.sleep(5)
     logger.info('进入二阶段')
     time.sleep(2)
-    placeArms(number + 1)
+    placeArms(number)
     while True:  # 等待战斗结束
         if matchThenClick(ms, templates['backhome'], window_loc):
             logger.info('回营')

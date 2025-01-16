@@ -44,8 +44,7 @@ class ScriptThread(QThread):
             while True:
                 for _ in range(self.collect_interval):  # 每打collect_interval场战斗，就收集一次圣水
                     zoomOut(keyboard, mouse, ((left + right) // 2, (top + bottom) // 2))  # 缩小视野至最小
-                    attack(keyboard, mouse, window_loc, ocr,
-                        TEMPLATES, (self.unit, UNITS[self.unit]), self.number)  # 进攻
+                    attack(keyboard, mouse, window_loc, ocr, TEMPLATES, (self.unit, UNITS[self.unit]), self.number)  # 进攻
                     if event.is_set():
                         break
                     time.sleep(6)
