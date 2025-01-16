@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>703</width>
-    <height>323</height>
+    <height>381</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -272,12 +272,12 @@
             </property>
             <item>
              <property name="text">
-              <string>龙</string>
+              <string>女巫</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>女巫</string>
+              <string>龙</string>
              </property>
             </item>
             <item>
@@ -311,7 +311,7 @@
              </font>
             </property>
             <property name="text">
-             <string>数量：</string>
+             <string>总数量（算上预备营）：</string>
             </property>
            </widget>
           </item>
@@ -330,7 +330,7 @@
              </size>
             </property>
             <property name="text">
-             <string>4</string>
+             <string>6</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -406,7 +406,7 @@
      <x>0</x>
      <y>0</y>
      <width>703</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>
