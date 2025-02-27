@@ -116,6 +116,7 @@ def attack(kb, ms, window_loc, ocr, templates, unit, number):
     mid_pos = ((left + right) // 2, (top + bottom) // 2)
     place_arms_pos = (mid_pos[0], top + 755)
     zoomOut(kb, ms, mid_pos)
+
     def placeArms(arm_num):
         scr_shot = ImageGrab.grab(window_loc)
         scr_shot = np.array(scr_shot)
@@ -133,6 +134,15 @@ def attack(kb, ms, window_loc, ocr, templates, unit, number):
             time.sleep(0.2)
             moveThenClick(ms, place_arms_pos)
             time.sleep(0.2)
+        else :
+            helicopter_pos = getMidCoordinate(window_loc, templates['helicopter'], scr_shot)
+            if helicopter_pos:
+                logger.info('放直升机')
+                moveThenClick(ms, helicopter_pos)
+                time.sleep(0.2)
+                moveThenClick(ms, place_arms_pos)
+                time.sleep(0.2)
+
         arm_pos = getTopCoordinate(window_loc, templates[f'{unit[1]}'], scr_shot)
         if arm_pos:
             logger.info(f'放{unit[0]}')
@@ -148,6 +158,7 @@ def attack(kb, ms, window_loc, ocr, templates, unit, number):
             for _ in range(number):
                 matchThenClick(ms, templates['skill'], window_loc, mid=False)
         ms.position = mid_pos  # 鼠标移动到中心
+
     placeArms(number)
     second_phase = False
     while True:  # 等待战斗结束

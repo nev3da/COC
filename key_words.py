@@ -22,6 +22,7 @@ TEMPLATES = {
     'victory_star': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'victory_star.png')), cv2.COLOR_BGR2RGB),
     'cancel': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'cancel.png')), cv2.COLOR_BGR2RGB),
     'war_machine': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'warmachine.png')), cv2.COLOR_BGR2RGB),
+    'helicopter': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'helicopter.png')), cv2.COLOR_BGR2RGB),
     'dragon': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'dragon.png')), cv2.COLOR_BGR2RGB),
     'witch': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'witch.png')), cv2.COLOR_BGR2RGB),
     'fly': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'fly.png')), cv2.COLOR_BGR2RGB),

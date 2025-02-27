@@ -64,7 +64,7 @@ class ScriptThread(QThread):
 class MainUi(QMainWindow, ui.Ui_MainWindow):
     def __init__(self):
         super(MainUi, self).__init__()
-        self.thread = None
+        self.thread: QThread = None
         self.setupUi(self)
         self.setLogics()
 
