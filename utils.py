@@ -13,6 +13,7 @@ import pynput
 import numpy as np
 from PIL import ImageGrab
 from log import logger
+import pyautogui
 
 
 def saveScreen(img_name):
@@ -45,15 +46,17 @@ def getWindowLocation(title='MuMu模拟器12'):
             return hwnd, (left, top, right, bottom)
 
 
-def zoomOut(kb, ms, midPos, times=10000):
+def zoomOut(kb, ms, midPos, times=10):
     # press ctrl with kb
-    kb.press(pynput.keyboard.Key.ctrl)
-    time.sleep(0.01)
     ms.position = midPos
-    time.sleep(0.01)
+    time.sleep(0.1)
+    kb.press(pynput.keyboard.Key.ctrl)
+    time.sleep(0.1)
     for _ in range(times):
-        win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, -1)
-    time.sleep(0.01)
+        ms.scroll(0, -1)
+        time.sleep(0.1)
+    pyautogui.scroll(-10000)
+    time.sleep(0.1)
     kb.release(pynput.keyboard.Key.ctrl)
 
 
@@ -75,7 +78,7 @@ def getMidCoordinate(window_loc, template, scr_shot=None, threshold=0.95):
     else:
         x, y = max_loc
         return window_loc[0] + x + template.shape[1] // 2, window_loc[1] + y + template.shape[0] // 2
-    
+
 def getBottomCoordinate(window_loc, template, scr_shot=None, threshold=0.95):
     if scr_shot is None:
         scr_shot = ImageGrab.grab(window_loc)
@@ -88,7 +91,7 @@ def getBottomCoordinate(window_loc, template, scr_shot=None, threshold=0.95):
     else:
         x, y = max_loc
         return window_loc[0] + x + template.shape[1] // 2, window_loc[1] + y + template.shape[0]
-    
+
 def getTopCoordinate(window_loc, template, scr_shot=None, threshold=0.95):
     if scr_shot is None:
         scr_shot = ImageGrab.grab(window_loc)
@@ -120,3 +123,15 @@ def logThenExit(msg, img_name, quit=True):
     saveScreen(img_name)
     if quit:
         exit(0)
+
+
+if __name__ == '__main__':
+    kb = pynput.keyboard.Controller()
+    ms = pynput.mouse.Controller()
+    kb.press(pynput.keyboard.Key.ctrl)
+    time.sleep(2)
+    for _ in range(10):
+        ms.scroll(0, -1)
+        time.sleep(0.1)
+    time.sleep(1)
+    kb.release(pynput.keyboard.Key.ctrl)

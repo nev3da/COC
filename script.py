@@ -13,7 +13,7 @@ from utils import *
 def collect(kb, ms, window_loc, templates):
     left, top, right, bottom = window_loc
     mid_pos = ((left + right) // 2, (top + bottom) // 2)
-    zoomOut(kb, ms, mid_pos, times=2000)
+    zoomOut(kb, ms, mid_pos)
     for _ in range(4):
         ms.position = mid_pos
         pyautogui.mouseDown()  # 按下鼠标左键
