@@ -90,7 +90,7 @@ def getBottomCoordinate(window_loc, template, scr_shot=None, threshold=0.95):
         return None
     else:
         x, y = max_loc
-        return window_loc[0] + x + template.shape[1] // 2, window_loc[1] + y + template.shape[0]
+        return window_loc[0] + x + template.shape[1] // 2, window_loc[1] + y + template.shape[0] + 30
 
 def getTopCoordinate(window_loc, template, scr_shot=None, threshold=0.95):
     if scr_shot is None:

@@ -192,6 +192,8 @@ def attack(kb, ms, window_loc, ocr, templates, unit, number):
                     break
         if second_phase:
             break
+        if matchThenClick(ms, templates["machine_skill"], window_loc, mid=False):
+            logger.info("战争机器放技能")
         time.sleep(5)
     logger.info("进入二阶段")
     time.sleep(2)
@@ -200,6 +202,8 @@ def attack(kb, ms, window_loc, ocr, templates, unit, number):
         if matchThenClick(ms, templates["backhome"], window_loc):
             logger.info("回营")
             return
+        if matchThenClick(ms, templates["machine_skill"], window_loc, mid=False):
+            logger.info("战争机器放技能")
         time.sleep(5)
 
 

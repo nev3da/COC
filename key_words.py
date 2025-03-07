@@ -27,6 +27,7 @@ TEMPLATES = {
     'witch': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'witch.png')), cv2.COLOR_BGR2RGB),
     'fly': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'fly.png')), cv2.COLOR_BGR2RGB),
     'skill': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'skill.png')), cv2.COLOR_BGR2RGB),
+    'machine_skill': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'machine_skill.png')), cv2.COLOR_BGR2RGB),
     'elixir1': cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'elixir1.png')), cv2.COLOR_BGR2RGB),
     'elixir2': cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'elixir2.png')), cv2.COLOR_BGR2RGB),
     'collect': cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'collect.png')), cv2.COLOR_BGR2RGB),
