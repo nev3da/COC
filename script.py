@@ -140,6 +140,11 @@ def attack(kb, ms, window_loc, ocr, templates, unit, number):
             pyautogui.moveTo(mid_pos[0], mid_pos[1] - 200, duration=0.2)
             time.sleep(0.1)
             pyautogui.mouseUp()
+        # 如果第一阶段战争机器挂了，第二阶段直升机图像会自动高亮。因此先点一下
+        time.sleep(0.5)
+        ms.click(pynput.mouse.Button.left)
+        time.sleep(0.5)
+
         war_machine_pos = getMidCoordinate(
             window_loc, templates["war_machine"], scr_shot
         )
