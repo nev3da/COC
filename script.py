@@ -142,6 +142,8 @@ def attack(kb, ms, window_loc, ocr, templates, unit, number):
             pyautogui.mouseUp()
         # 如果第一阶段战争机器挂了，第二阶段直升机图像会自动高亮。因此先点一下
         time.sleep(0.5)
+        ms.position = place_arms_pos
+        time.sleep(0.2)
         ms.click(pynput.mouse.Button.left)
         time.sleep(0.5)
 
