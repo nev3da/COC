@@ -5,6 +5,8 @@
 import cv2
 import os
 
+BATTLE_TIME = 120   # 战斗时间
+
 ARM_DIR = 'arm_imgs'
 CONTROL_DIR = 'control_imgs'
 RESOURCE_DIR = 'resource_imgs'
@@ -21,6 +23,8 @@ TEMPLATES = {
     'backhome': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'backhome.png')), cv2.COLOR_BGR2RGB),
     'victory_star': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'victory_star.png')), cv2.COLOR_BGR2RGB),
     'cancel': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'cancel.png')), cv2.COLOR_BGR2RGB),
+    'giveup': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'giveup.png')), cv2.COLOR_BGR2RGB),
+    'giveup_confirm': cv2.cvtColor(cv2.imread(os.path.join(CONTROL_DIR, 'giveup_confirm.png')), cv2.COLOR_BGR2RGB),
     'war_machine': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'warmachine.png')), cv2.COLOR_BGR2RGB),
     'helicopter': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'helicopter.png')), cv2.COLOR_BGR2RGB),
     'dragon': cv2.cvtColor(cv2.imread(os.path.join(ARM_DIR, 'dragon.png')), cv2.COLOR_BGR2RGB),

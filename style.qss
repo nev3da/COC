@@ -58,7 +58,13 @@ QComboBox QAbstractItemView {
     selection-color: white; /* 选中项的字体颜色 */
 }
 
-#widget_4 {
+#widget_7 {
+    border: 3px solid #d6d6d6; /* 边框颜色 */
+    border-radius: 8px; /* 圆角效果 */
+    padding: 10px; /* 内间距，确保内容不贴边 */
+}
+
+#widget_8 {
     border: 3px solid #d6d6d6; /* 边框颜色 */
     border-radius: 8px; /* 圆角效果 */
     padding: 10px; /* 内间距，确保内容不贴边 */
