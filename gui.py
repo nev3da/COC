@@ -22,15 +22,16 @@ import threading
 import pynput
 
 
-class StandardThread(QThread):
+class ScriptThread(QThread):
     finished = pyqtSignal()
 
     def __init__(
-        self, window_name, collect_interval=4, execute_time=3.0, unit="龙", number=4
+        self, window_name, collect_interval_1=4, collect_interval_2=0, execute_time=3.0, unit="龙", number=4
     ):
-        super(StandardThread, self).__init__()
+        super(ScriptThread, self).__init__()
         self.window_name = window_name
-        self.collect_interval = collect_interval
+        self.collect_interval_1 = collect_interval_1
+        self.collect_interval_2 = collect_interval_2
         self.execute_time = execute_time * 60 * 60
         self.unit = unit
         self.number = number
@@ -43,12 +44,16 @@ class StandardThread(QThread):
         left, top, right, bottom = window_loc
         start_time = time.time()
 
+        battle_num1 = self.collect_interval_1
+        battle_num2 = self.collect_interval_2
+        battle_total = battle_num1 + battle_num2
+
         try:
             while True:
-                # 每打collect_interval场战斗，就收集一次圣水
-                for i in range(self.collect_interval):
+                # 每打battle_total场战斗，就收集一次圣水
+                for i in range(battle_total):
                     logger.info(
-                        f"距离收集圣水还有[{self.collect_interval - i}/{self.collect_interval}]场战斗"
+                        f"距离收集圣水还有[{battle_total - i}/{battle_total}]场战斗"
                     )
                     # 缩小视野至最小
                     zoomOut(keyboard, mouse, ((left + right) // 2, (top + bottom) // 2))
@@ -61,6 +66,8 @@ class StandardThread(QThread):
                         TEMPLATES,
                         (self.unit, UNITS[self.unit]),
                         self.number,
+                    ) if i < battle_num1 else attackWithNoArms(
+                        keyboard, mouse, window_loc, ocr, TEMPLATES, self.unit
                     )
                     if event.is_set():
                         break
@@ -68,62 +75,6 @@ class StandardThread(QThread):
                     # 检查是否弹出胜利之星奖励
                     logger.info("检查胜利之星")
                     matchThenClick(mouse, TEMPLATES["victory_star"], window_loc)
-                if event.is_set():
-                    logger.success("已手动停止")
-                    break
-                # 收集圣水
-                collect(keyboard, mouse, window_loc, TEMPLATES)
-                # 判断是否到达执行时间，
-                if time.time() - start_time >= self.execute_time:
-                    logger.success("已到达执行时间")
-                    break
-                else:
-                    elapsed_time = time.time() - start_time
-                    hours, remainder = divmod(elapsed_time, 3600)
-                    minutes, seconds = divmod(remainder, 60)
-                    logger.info(
-                        f"已执行时间：[{int(hours)}h{int(minutes)}min{int(seconds)}s/{int(self.execute_time / 3600)}h]"
-                    )
-        finally:
-            self.finished.emit()
-
-
-class DropThread(QThread):
-    finished = pyqtSignal()
-
-    def __init__(
-        self, window_name, collect_interval=10, execute_time=3.0, unit="witch"
-    ):
-        super(DropThread, self).__init__()
-        self.window_name = window_name
-        self.collect_interval = collect_interval
-        self.execute_time = execute_time * 60 * 60
-        self.unit = unit
-
-    def run(self):
-        ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
-        keyboard = pynput.keyboard.Controller()
-        mouse = pynput.mouse.Controller()
-        window_loc = getWindowLocation(self.window_name)[1]
-        left, top, right, bottom = window_loc
-        start_time = time.time()
-
-        try:
-            while True:
-                # 每打collect_interval场战斗，就收集一次圣水
-                for i in range(self.collect_interval):
-                    logger.info(
-                        f"距离收集圣水还有[{self.collect_interval - i}/{self.collect_interval}]场战斗"
-                    )
-                    # 缩小视野至最小
-                    zoomOut(keyboard, mouse, ((left + right) // 2, (top + bottom) // 2))
-                    # 进攻
-                    attackWithNoArms(
-                        keyboard, mouse, window_loc, ocr, TEMPLATES, self.unit
-                    )
-                    if event.is_set():
-                        break
-                    time.sleep(4)
                 if event.is_set():
                     logger.success("已手动停止")
                     break
@@ -152,59 +103,36 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
         self.setLogics()
 
     def setLogics(self):
-        def standardEvent():
-            if self.btn_1.text() == "开始":
-                self.btn_2.setEnabled(False)
+        def scriptEvent():
+            if self.btn.text() == "开始":
                 event.clear()
-                self.btn_1.setText("停止")
-                self.standard()
+                self.btn.setText("停止")
+                self.begin()
             else:
                 event.set()
-                self.btn_1.setText("等待结束")
-                self.btn_1.setEnabled(False)
+                self.btn.setText("等待结束")
+                self.btn.setEnabled(False)
 
-        def dropEvent():
-            if self.btn_2.text() == "开始":
-                self.btn_1.setEnabled(False)
-                event.clear()
-                self.btn_2.setText("停止")
-                self.drop()
-            else:
-                event.set()
-                self.btn_2.setText("等待结束")
-                self.btn_2.setEnabled(False)
-
-        self.btn_1.clicked.connect(standardEvent)
-        self.btn_2.clicked.connect(dropEvent)
+        self.btn.clicked.connect(scriptEvent)
         self.setWindowIcon(QIcon("avatar.ico"))
 
-    def standard(self):
+    def begin(self):
         window_name = self.window_name_label.text()
-        collect_interval = int(self.collect_interval.text())
-        execute_time = float(self.execute_time_1.text())
-        unit = self.unit_1.currentText()
+        collect_interval_1 = int(self.collect_interval_1.text())
+        collect_interval_2 = int(self.collect_interval_2.text())
+        execute_time = float(self.execute_time.text())
+        unit = self.unit.currentText()
         number = int(self.number.text())
 
-        self.thread = StandardThread(
-            window_name, collect_interval, execute_time, unit, number
+        self.thread = ScriptThread(
+            window_name, collect_interval_1, collect_interval_2, execute_time, unit, number
         )
         self.thread.finished.connect(self.finished)
         self.thread.start()
 
-    def drop(self):
-        window_name = self.window_name_label.text()
-        execute_time = float(self.execute_time_2.text())
-        unit = self.unit_2.currentText()
-
-        self.thread = DropThread(window_name, 10, execute_time, unit)
-        self.thread.finished.connect(self.finished)
-        self.thread.start()
-
     def finished(self):
-        self.btn_1.setText("开始")
-        self.btn_2.setText("开始")
-        self.btn_1.setEnabled(True)
-        self.btn_2.setEnabled(True)
+        self.btn.setText("开始")
+        self.btn.setEnabled(True)
         self.thread.quit()
 
 

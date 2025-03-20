@@ -8,6 +8,7 @@ import pyautogui
 from paddleocr import PaddleOCR
 from tqdm import tqdm
 import time
+import pickle
 
 from key_words import *
 from utils import *
@@ -29,16 +30,32 @@ def collect(kb, ms, window_loc, templates):
     time.sleep(1)
     logger.info("识别圣水车")
     while True:
+        scr_shot = ImageGrab.grab(window_loc)
+        scr_shot = np.array(scr_shot)
+        # 识别白色背景圣水
         wheelbarrow_pos = getMidCoordinate(
-            window_loc, templates["elixir1"], threshold=0.8
+            window_loc, templates["elixir1"], scr_shot, threshold=0.8
         )
         if not wheelbarrow_pos:
+            # 识别红色背景圣水
             wheelbarrow_pos = getMidCoordinate(
-                window_loc, templates["elixir2"], threshold=0.8
+                window_loc, templates["elixir2"], scr_shot, threshold=0.8
             )
             if not wheelbarrow_pos:
-                logger.warning("未找到圣水车")
-                return
+                find_wheelbarrow = False
+                # 识别斧子
+                for filename in os.listdir(templates["axe"]):
+                    t = None
+                    with open(os.path.join(templates["axe"], filename), "rb") as f:
+                        t = pickle.load(f)
+                        t = cv2.cvtColor(t, cv2.COLOR_BGR2RGB)
+                    wheelbarrow_pos = getMidCoordinate(window_loc, t, scr_shot, threshold=0.75)
+                    if wheelbarrow_pos:
+                        find_wheelbarrow = True
+                        break
+                if not find_wheelbarrow:
+                    logger.warning("未找到圣水车")
+                    return
         moveThenClick(ms, wheelbarrow_pos)
         time.sleep(1)
         logger.info("识别收集和关闭按钮")
@@ -290,7 +307,7 @@ def attackWithNoArms(
     zoomOut(kb, ms, mid_pos)
 
     # 屏幕下移
-    for _ in range(3):  
+    for _ in range(3):
         ms.position = mid_pos
         pyautogui.mouseDown()
         time.sleep(0.1)

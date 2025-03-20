@@ -1,71 +1,84 @@
-/* 主窗口背景 */
-QWidget {
-    background-color: #f8f9fa; /* 浅灰色背景 */
-    font-family: "Arial", sans-serif;
-    font-size: 30px;
-    color: #343a40; /* 深灰色字体 */
+/* style.qss */
+QMainWindow {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 #f0f2f5, stop:1 #e6e9ef);
 }
 
-/* QLabel 样式 */
 QLabel {
-    color: #495057; /* 字体颜色 */
-    font-size: 30px;
+    color: #4a5568;
+    font-family: "微软雅黑";
+    font-size: 12pt;
 }
 
-/* QLineEdit 样式 */
 QLineEdit {
-    border: 1px solid #ced4da; /* 边框颜色 */
-    border-radius: 4px;
-    padding: 4px;
-    background-color: #ffffff; /* 背景色 */
-    color: #495057;
+    background: rgba(255,255,255,0.9);
+    border: 2px solid #cbd5e0;
+    border-radius: 8px;
+    padding: 6px;
+    font-size: 12pt;
+    color: #2d3748;
+    selection-background-color: #a0aec0;
 }
-
+QLineEdit:hover {
+    border-color: #a0aec0;
+    background: rgba(255,255,255,0.95);
+}
 QLineEdit:focus {
-    border: 1px solid #5c9ded; /* 聚焦时的边框颜色 */
-    background-color: #eef7ff; /* 聚焦时的背景色 */
+    border-color: #63b3ed;
+    background: white;
 }
 
-/* QPushButton 样式 */
-QPushButton {
-    border: 1px solid #007bff; /* 边框颜色 */
-    border-radius: 4px;
-    background-color: #007bff; /* 背景色 */
-    color: white; /* 字体颜色 */
-    padding: 6px 12px;
-}
-
-QPushButton:hover {
-    background-color: #0056b3; /* 悬停时的背景色 */
-}
-
-QPushButton:pressed {
-    background-color: #003f7f; /* 点击时的背景色 */
-}
-
-/* QComboBox 样式 */
 QComboBox {
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    padding: 4px;
-    background-color: #ffffff;
-    color: #495057;
+    background: rgba(255,255,255,0.9);
+    border: 2px solid #cbd5e0;
+    border-radius: 8px;
+    padding: 6px 12px;
+    min-width: 6em;
+    font-size: 12pt;
+    color: #2d3748;
 }
-
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: right top;
+    width: 20px;
+    border-left: 2px solid #cbd5e0;
+}
 QComboBox QAbstractItemView {
-    border: 1px solid #ced4da;
-    selection-background-color: #5c9ded; /* 选中项的背景色 */
-    selection-color: white; /* 选中项的字体颜色 */
+    background: white;
+    border: 2px solid #cbd5e0;
+    selection-background-color: #63b3ed;
 }
 
-#widget_7 {
-    border: 3px solid #d6d6d6; /* 边框颜色 */
-    border-radius: 8px; /* 圆角效果 */
-    padding: 10px; /* 内间距，确保内容不贴边 */
+QPushButton#btn {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                stop:0 #63b3ed, stop:1 #4299e1);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    padding: 12px 24px;
+    font-size: 14pt;
+    font-weight: bold;
+    min-width: 120px;
+}
+QPushButton#btn:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                stop:0 #76c5f0, stop:1 #4ab0e8);
+}
+QPushButton#btn:pressed {
+    background: #4299e1;
+    padding: 14px 24px 10px 24px;
 }
 
-#widget_8 {
-    border: 3px solid #d6d6d6; /* 边框颜色 */
-    border-radius: 8px; /* 圆角效果 */
-    padding: 10px; /* 内间距，确保内容不贴边 */
+QWidget#widget_4 {
+    background: rgba(255,255,255,0.8);
+    border-radius: 16px;
+    margin: 10px;
+    padding: 15px;
+    border: 2px solid #e2e8f0;
+}
+
+QStatusBar {
+    background: rgba(255,255,255,0);
+    color: #4a5568;
+    border-top: 2px solid #e2e8f0;
 }

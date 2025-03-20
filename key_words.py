@@ -36,4 +36,9 @@ TEMPLATES = {
     'elixir2': cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'elixir2.png')), cv2.COLOR_BGR2RGB),
     'collect': cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'collect.png')), cv2.COLOR_BGR2RGB),
     'close': cv2.cvtColor(cv2.imread(os.path.join(RESOURCE_DIR, 'close.png')), cv2.COLOR_BGR2RGB),
+    'axe': os.path.join(RESOURCE_DIR, 'axe')
 }
+
+if __name__ == '__main__':
+    for name in os.listdir(TEMPLATES['axe']):
+        print(os.path.join(TEMPLATES['axe'], name))
