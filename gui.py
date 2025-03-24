@@ -23,7 +23,7 @@ import pynput
 
 
 class ScriptThread(QThread):
-    finished = pyqtSignal()
+    finish_sig = pyqtSignal()
 
     def __init__(
         self, window_name, collect_interval_1=4, collect_interval_2=0, execute_time=3.0, unit="龙", number=4
@@ -71,7 +71,7 @@ class ScriptThread(QThread):
                     )
                     if event.is_set():
                         break
-                    time.sleep(6)
+                    time.sleep(4) if i < battle_num1 else time.sleep(2)
                     # 检查是否弹出胜利之星奖励
                     logger.info("检查胜利之星")
                     matchThenClick(mouse, TEMPLATES["victory_star"], window_loc)
@@ -92,7 +92,7 @@ class ScriptThread(QThread):
                         f"已执行时间：[{int(hours)}h{int(minutes)}min{int(seconds)}s/{int(self.execute_time / 3600)}h]"
                     )
         finally:
-            self.finished.emit()
+            self.finish_sig.emit()
 
 
 class MainUi(QMainWindow, ui.Ui_MainWindow):
@@ -127,7 +127,7 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
         self.thread = ScriptThread(
             window_name, collect_interval_1, collect_interval_2, execute_time, unit, number
         )
-        self.thread.finished.connect(self.finished)
+        self.thread.finish_sig.connect(self.finished)
         self.thread.start()
 
     def finished(self):
