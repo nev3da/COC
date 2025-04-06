@@ -125,18 +125,21 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="execute_time">
+           <widget class="QSpinBox" name="execute_time">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="maximumSize">
              <size>
-              <width>40</width>
+              <width>80</width>
               <height>16777215</height>
              </size>
             </property>
-            <property name="text">
-             <string>3</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
+            <property name="value">
+             <number>3</number>
             </property>
            </widget>
           </item>
@@ -374,7 +377,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="number">
+           <widget class="QSpinBox" name="number">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -387,11 +390,11 @@
               <height>16777215</height>
              </size>
             </property>
-            <property name="text">
-             <string>7</string>
+            <property name="cursor">
+             <cursorShape>ArrowCursor</cursorShape>
             </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
+            <property name="value">
+             <number>7</number>
             </property>
            </widget>
           </item>

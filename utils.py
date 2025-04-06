@@ -2,6 +2,7 @@
 作者：yuanl
 日期：2024年12月24日
 """
+
 import win32con
 import win32gui
 import win32print
@@ -14,6 +15,7 @@ import numpy as np
 from PIL import ImageGrab
 from log import logger
 import pyautogui
+from PyQt5.QtCore import QThread
 
 
 def saveScreen(img_name):
@@ -24,20 +26,22 @@ def saveScreen(img_name):
 
 def getScaling():
     soft_width = GetSystemMetrics(0)
-    screen_width = win32print.GetDeviceCaps(win32gui.GetDC(0), win32con.DESKTOPHORZRES)
+    screen_width = win32print.GetDeviceCaps(
+        win32gui.GetDC(0), win32con.DESKTOPHORZRES)
     scaling = round(screen_width / soft_width * 100) / 100
     return scaling
 
 
-def getWindowLocation(title='MuMu模拟器12'):
+def getWindowLocation(title="MuMu模拟器12"):
     hwnd = win32gui.FindWindow(None, title)
     if hwnd == 0:
-        logger.error('游戏没开，或窗口名称错误')
-        exit(0)
+        logger.error("游戏没开，或窗口名称错误")
+        raise RuntimeError("游戏没开，或窗口名称错误")
     else:
         try:
             # 发送还原最小化窗口的信息
-            win32gui.SendMessage(hwnd, win32con.WM_SYSCOMMAND, win32con.SC_RESTORE, 0)
+            win32gui.SendMessage(
+                hwnd, win32con.WM_SYSCOMMAND, win32con.SC_RESTORE, 0)
             time.sleep(0.1)
             # 设为高亮
             win32gui.SetForegroundWindow(hwnd)
@@ -46,7 +50,12 @@ def getWindowLocation(title='MuMu模拟器12'):
             return hwnd, (left, top, right, bottom)
 
 
-def zoomOut(kb, ms, midPos, times=10):
+def zoomOut(
+    kb: pynput.keyboard.Controller,
+    ms: pynput.mouse.Controller,
+    midPos: tuple[int, int],
+    times: int = 10,
+):
     # press ctrl with kb
     ms.position = midPos
     time.sleep(0.1)
@@ -60,13 +69,36 @@ def zoomOut(kb, ms, midPos, times=10):
     kb.release(pynput.keyboard.Key.ctrl)
 
 
-def moveThenClick(ms, pos, duration=0.1):
+def shiftScreen(mid_pos: tuple[int, int], times: int = 4):
+    for _ in range(abs(times)):
+        # move cursor
+        pyautogui.moveTo(mid_pos[0], mid_pos[1], duration=0.01)
+        # 按下鼠标左键
+        pyautogui.mouseDown()
+        time.sleep(0.1)
+        # 向上/下移
+        pyautogui.moveTo(
+            mid_pos[0], mid_pos[1] + (200 if times > 0 else -200), duration=0.2
+        )
+        time.sleep(0.1)
+        pyautogui.mouseUp()
+
+
+def moveThenClick(
+    ms: pynput.mouse.Controller, pos: tuple[int, int], duration: float = 0.1
+):
     ms.position = pos
     time.sleep(duration)
     ms.click(pynput.mouse.Button.left)
 
 
-def getMidCoordinate(window_loc, template, scr_shot=None, threshold=0.95):
+def getCoordinate(
+    window_loc: tuple[int, int, int, int],
+    template: np.ndarray,
+    scr_shot: np.ndarray = None,
+    threshold: float = 0.95,
+    pos: str = "mid",
+):
     if scr_shot is None:
         scr_shot = ImageGrab.grab(window_loc)
         scr_shot = np.array(scr_shot)
@@ -77,37 +109,34 @@ def getMidCoordinate(window_loc, template, scr_shot=None, threshold=0.95):
         return None
     else:
         x, y = max_loc
-        return window_loc[0] + x + template.shape[1] // 2, window_loc[1] + y + template.shape[0] // 2
-
-def getBottomCoordinate(window_loc, template, scr_shot=None, threshold=0.95):
-    if scr_shot is None:
-        scr_shot = ImageGrab.grab(window_loc)
-        scr_shot = np.array(scr_shot)
-    res = cv2.matchTemplate(scr_shot, template, cv2.TM_CCOEFF_NORMED)
-    _, max_val, _, max_loc = cv2.minMaxLoc(res)
-    # print(max_val)
-    if max_val < threshold:
-        return None
-    else:
-        x, y = max_loc
-        return window_loc[0] + x + template.shape[1] // 2, window_loc[1] + y + template.shape[0] + 30
-
-def getTopCoordinate(window_loc, template, scr_shot=None, threshold=0.95):
-    if scr_shot is None:
-        scr_shot = ImageGrab.grab(window_loc)
-        scr_shot = np.array(scr_shot)
-    res = cv2.matchTemplate(scr_shot, template, cv2.TM_CCOEFF_NORMED)
-    _, max_val, _, max_loc = cv2.minMaxLoc(res)
-    # print(max_val)
-    if max_val < threshold:
-        return None
-    else:
-        x, y = max_loc
-        return window_loc[0] + x + template.shape[1] // 2, window_loc[1] + y
+        if pos == "mid":
+            return (
+                window_loc[0] + x + template.shape[1] // 2,
+                window_loc[1] + y + template.shape[0] // 2,
+            )
+        elif pos == "top":
+            return window_loc[0] + x + template.shape[1] // 2, window_loc[1] + y
+        elif pos == "bottom":
+            return (
+                window_loc[0] + x + template.shape[1] // 2,
+                window_loc[1] + y + template.shape[0] + 30,
+            )
+        else:
+            return None
 
 
-def matchThenClick(ms, template, window_loc, mid=True):
-    pos = getMidCoordinate(window_loc, template) if mid else getBottomCoordinate(window_loc, template)
+def matchThenClick(
+    ms: pynput.mouse.Controller,
+    template: np.ndarray,
+    window_loc: tuple[int, int, int, int],
+    mid: bool = True,
+):
+    pos = (
+        getCoordinate(window_loc, template)
+        if mid
+        else getCoordinate(window_loc, template, pos="bottom")
+    )
+
     if pos:
         moveThenClick(ms, pos)
         time.sleep(1)
@@ -115,23 +144,30 @@ def matchThenClick(ms, template, window_loc, mid=True):
     return False
 
 
-def logThenExit(msg, img_name, quit=True):
-    if quit:
-        logger.critical(msg)
-    else:
-        logger.warning(msg)
+def waitUntilMatchThenClick(
+    ms: pynput.mouse.Controller,
+    template: np.ndarray,
+    window_loc: tuple[int, int, int, int],
+    interval: float = 0,
+    timeout: float = 10.0,
+):
+    start_time = time.time()
+    while True:
+        if time.time() - start_time > timeout:
+            return False
+        if matchThenClick(ms, template, window_loc):
+            return True
+        time.sleep(interval)
+
+
+def logThenExit(msg: str, img_name: str, quit: bool = True):
     saveScreen(img_name)
     if quit:
-        exit(0)
+        logger.critical(msg)
+        raise RuntimeError(msg)
+    else:
+        logger.warning(msg)
 
 
-if __name__ == '__main__':
-    kb = pynput.keyboard.Controller()
-    ms = pynput.mouse.Controller()
-    kb.press(pynput.keyboard.Key.ctrl)
-    time.sleep(2)
-    for _ in range(10):
-        ms.scroll(0, -1)
-        time.sleep(0.1)
-    time.sleep(1)
-    kb.release(pynput.keyboard.Key.ctrl)
+if __name__ == "__main__":
+    print(type(abs(4)))

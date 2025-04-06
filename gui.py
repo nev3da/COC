@@ -4,7 +4,7 @@
 """
 
 import ui
-from script import attack, collect, attackWithNoArms
+from script import attack, collect, attackThenRetreat
 from key_words import *
 from utils import *
 import ctypes
@@ -26,7 +26,13 @@ class ScriptThread(QThread):
     finish_sig = pyqtSignal()
 
     def __init__(
-        self, window_name, collect_interval_1=4, collect_interval_2=0, execute_time=3.0, unit="龙", number=4
+        self,
+        window_name,
+        collect_interval_1=4,
+        collect_interval_2=0,
+        execute_time=3.0,
+        unit="龙",
+        number=4,
     ):
         super(ScriptThread, self).__init__()
         self.window_name = window_name
@@ -37,18 +43,17 @@ class ScriptThread(QThread):
         self.number = number
 
     def run(self):
-        ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
-        keyboard = pynput.keyboard.Controller()
-        mouse = pynput.mouse.Controller()
-        window_loc = getWindowLocation(self.window_name)[1]
-        left, top, right, bottom = window_loc
-        start_time = time.time()
-
-        battle_num1 = self.collect_interval_1
-        battle_num2 = self.collect_interval_2
-        battle_total = battle_num1 + battle_num2
-
         try:
+            ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+            keyboard = pynput.keyboard.Controller()
+            mouse = pynput.mouse.Controller()
+            window_loc = getWindowLocation(self.window_name)[1]
+            left, top, right, bottom = window_loc
+            start_time = time.time()
+
+            battle_num1 = self.collect_interval_1
+            battle_num2 = self.collect_interval_2
+            battle_total = battle_num1 + battle_num2
             while True:
                 # 每打battle_total场战斗，就收集一次圣水
                 for i in range(battle_total):
@@ -56,25 +61,18 @@ class ScriptThread(QThread):
                         f"距离收集圣水还有[{battle_total - i}/{battle_total}]场战斗"
                     )
                     # 缩小视野至最小
-                    zoomOut(keyboard, mouse, ((left + right) // 2, (top + bottom) // 2))
+                    zoomOut(keyboard, mouse,
+                            ((left + right) // 2, (top + bottom) // 2))
                     # 进攻
-                    attack(
-                        keyboard,
-                        mouse,
-                        window_loc,
-                        ocr,
-                        TEMPLATES,
-                        (self.unit, UNITS[self.unit]),
-                        self.number,
-                    ) if i < battle_num1 else attackWithNoArms(
-                        keyboard, mouse, window_loc, ocr, TEMPLATES, self.unit
-                    )
+                    attack(keyboard, mouse, window_loc, ocr, TEMPLATES, (self.unit, UNITS[self.unit]), self.number) if i < battle_num1 else attackThenRetreat(
+                        keyboard, mouse, window_loc, ocr, TEMPLATES, self.unit)
                     if event.is_set():
                         break
                     time.sleep(4) if i < battle_num1 else time.sleep(2)
                     # 检查是否弹出胜利之星奖励
                     logger.info("检查胜利之星")
-                    matchThenClick(mouse, TEMPLATES["victory_star"], window_loc)
+                    matchThenClick(
+                        mouse, TEMPLATES["victory_star"], window_loc)
                 if event.is_set():
                     logger.success("已手动停止")
                     break
@@ -91,6 +89,8 @@ class ScriptThread(QThread):
                     logger.info(
                         f"已执行时间：[{int(hours)}h{int(minutes)}min{int(seconds)}s/{int(self.execute_time / 3600)}h]"
                     )
+        except Exception as e:
+            pass
         finally:
             self.finish_sig.emit()
 
@@ -98,7 +98,7 @@ class ScriptThread(QThread):
 class MainUi(QMainWindow, ui.Ui_MainWindow):
     def __init__(self):
         super(MainUi, self).__init__()
-        self.thread: QThread = None
+        self.thread: QThread
         self.setupUi(self)
         self.setLogics()
 
@@ -125,7 +125,12 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
         number = int(self.number.text())
 
         self.thread = ScriptThread(
-            window_name, collect_interval_1, collect_interval_2, execute_time, unit, number
+            window_name,
+            collect_interval_1,
+            collect_interval_2,
+            execute_time,
+            unit,
+            number,
         )
         self.thread.finish_sig.connect(self.finished)
         self.thread.start()
@@ -134,6 +139,8 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
         self.btn.setText("开始")
         self.btn.setEnabled(True)
         self.thread.quit()
+        self.thread.wait()
+        logger.success("线程已安全退出")
 
 
 if __name__ == "__main__":
@@ -143,7 +150,8 @@ if __name__ == "__main__":
     event = threading.Event()
     app = QApplication(sys.argv)
     try:
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("cocscript")
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+            "cocscript")
     except Exception as e:
         logger.error(e)
     with open("style.qss", "r", encoding="utf-8") as file:

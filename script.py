@@ -9,6 +9,7 @@ from paddleocr import PaddleOCR
 from tqdm import tqdm
 import time
 import pickle
+from PyQt5.QtCore import QThread
 
 from key_words import *
 from utils import *
@@ -18,27 +19,19 @@ def collect(kb, ms, window_loc, templates):
     left, top, right, bottom = window_loc
     mid_pos = ((left + right) // 2, (top + bottom) // 2)
     zoomOut(kb, ms, mid_pos)
-    for _ in range(4):
-        ms.position = mid_pos
-        # 按下鼠标左键
-        pyautogui.mouseDown()
-        time.sleep(0.1)
-        # 向上移
-        pyautogui.moveTo(mid_pos[0], mid_pos[1] + 200, duration=0.2)
-        time.sleep(0.1)
-        pyautogui.mouseUp()
+    shiftScreen(mid_pos, 4)
     time.sleep(1)
     logger.info("识别圣水车")
     while True:
         scr_shot = ImageGrab.grab(window_loc)
         scr_shot = np.array(scr_shot)
         # 识别白色背景圣水
-        wheelbarrow_pos = getMidCoordinate(
+        wheelbarrow_pos = getCoordinate(
             window_loc, templates["elixir1"], scr_shot, threshold=0.8
         )
         if not wheelbarrow_pos:
             # 识别红色背景圣水
-            wheelbarrow_pos = getMidCoordinate(
+            wheelbarrow_pos = getCoordinate(
                 window_loc, templates["elixir2"], scr_shot, threshold=0.8
             )
             if not wheelbarrow_pos:
@@ -49,7 +42,9 @@ def collect(kb, ms, window_loc, templates):
                     with open(os.path.join(templates["axe"], filename), "rb") as f:
                         t = pickle.load(f)
                         t = cv2.cvtColor(t, cv2.COLOR_BGR2RGB)
-                    wheelbarrow_pos = getMidCoordinate(window_loc, t, scr_shot, threshold=0.75)
+                    wheelbarrow_pos = getCoordinate(
+                        window_loc, t, scr_shot, threshold=0.75
+                    )
                     if wheelbarrow_pos:
                         find_wheelbarrow = True
                         break
@@ -59,12 +54,12 @@ def collect(kb, ms, window_loc, templates):
         moveThenClick(ms, wheelbarrow_pos)
         time.sleep(1)
         logger.info("识别收集和关闭按钮")
-        close_pos = getMidCoordinate(window_loc, templates["close"])
+        close_pos = getCoordinate(window_loc, templates["close"])
         if not close_pos:
             logger.info("识别到了圣水瓶，重新识别圣水车")
         else:
             break
-    collect_pos = getMidCoordinate(window_loc, templates["collect"])
+    collect_pos = getCoordinate(window_loc, templates["collect"])
     # 如果找到收集按钮就点一下，没找到可能是因为圣水满了，收集按钮变灰，识别不到，所以直接点关闭
     if collect_pos:
         logger.info("收集")
@@ -74,12 +69,13 @@ def collect(kb, ms, window_loc, templates):
     moveThenClick(ms, close_pos)
 
 
+# 进攻按钮是半透明的，所以没用模板匹配，而是用OCR识别
 def getAttackPos(window_loc, ocr):
     left, top, right, bottom = window_loc
     w, h = right - left, bottom - top
     scr_shot = ImageGrab.grab(window_loc)
     scr_shot = np.array(scr_shot)
-    result = ocr.ocr(scr_shot[round(1 / 2 * h) :, : round(1 / 2 * w), :])
+    result = ocr.ocr(scr_shot[round(1 / 2 * h):, : round(1 / 2 * w), :])
     if not result[0]:
         return None
     for line in result[0]:
@@ -89,12 +85,13 @@ def getAttackPos(window_loc, ocr):
                 round((four_corner[0][0] + four_corner[1][0]) / 2),
                 round((four_corner[0][1] + four_corner[2][1]) / 2),
             )
-            attack_pos = (left + mid_point[0], top + mid_point[1] + round(1 / 2 * h))
+            attack_pos = (left + mid_point[0],
+                          top + mid_point[1] + round(1 / 2 * h))
             return attack_pos
     return None
 
 
-def waitUntilMatch(ocr, window_loc, time_limit=10.0):
+def matchOpponent(ocr, window_loc, time_limit=10.0):
     time.sleep(1)
     left, top, right, bottom = window_loc
     w, h = right - left, bottom - top
@@ -102,11 +99,12 @@ def waitUntilMatch(ocr, window_loc, time_limit=10.0):
     while True:
         if time.time() - start_time >= time_limit:
             return False
-        logger.info(f"正在匹配对手：[{time.time() - start_time:.2f}/{time_limit:.2f}]")
+        logger.info(
+            f"正在匹配对手：[{time.time() - start_time:.2f}/{time_limit:.2f}]")
         scr_shot = ImageGrab.grab(window_loc)
         scr_shot = np.array(scr_shot)
         result = ocr.ocr(
-            scr_shot[: round(1 / 3 * h), round(1 / 3 * w) : round(2 / 3 * w), :]
+            scr_shot[: round(1 / 3 * h), round(1 / 3 * w): round(2 / 3 * w), :]
         )
         if not result[0]:
             time.sleep(1)
@@ -135,10 +133,9 @@ def attack(
             if not attack_pos:
                 logThenExit("未找到进攻按钮", "no_attack.png")
             moveThenClick(ms, attack_pos)
-            time.sleep(1)
-            if not matchThenClick(ms, templates["search"], window_loc):
+            if not waitUntilMatchThenClick(ms, templates["search"], window_loc, timeout=2):
                 logThenExit("未找到搜索按钮", "no_search.png")
-            if waitUntilMatch(ocr, window_loc):  # 找到对手
+            if matchOpponent(ocr, window_loc):  # 找到对手
                 find = True
                 break
             else:  # 规定时间内未找到对手
@@ -160,13 +157,7 @@ def attack(
     zoomOut(kb, ms, mid_pos)
 
     def placeArms(arm_num):
-        for _ in range(3):  # 屏幕下移
-            ms.position = mid_pos
-            pyautogui.mouseDown()
-            time.sleep(0.1)
-            pyautogui.moveTo(mid_pos[0], mid_pos[1] - 200, duration=0.2)
-            time.sleep(0.1)
-            pyautogui.mouseUp()
+        shiftScreen(mid_pos, -3)
         # 如果第一阶段战争机器挂了，第二阶段直升机图像会自动高亮。因此先点一下
         time.sleep(0.5)
         ms.position = place_arms_pos
@@ -176,9 +167,8 @@ def attack(
 
         scr_shot = ImageGrab.grab(window_loc)
         scr_shot = np.array(scr_shot)
-        war_machine_pos = getMidCoordinate(
-            window_loc, templates["war_machine"], scr_shot
-        )
+        war_machine_pos = getCoordinate(
+            window_loc, templates["war_machine"], scr_shot)
         if war_machine_pos:
             logger.info("放战争机器")
             moveThenClick(ms, war_machine_pos)
@@ -186,7 +176,7 @@ def attack(
             moveThenClick(ms, place_arms_pos)
             time.sleep(0.2)
         else:
-            helicopter_pos = getMidCoordinate(
+            helicopter_pos = getCoordinate(
                 window_loc, templates["helicopter"], scr_shot
             )
             if helicopter_pos:
@@ -196,7 +186,8 @@ def attack(
                 moveThenClick(ms, place_arms_pos)
                 time.sleep(0.2)
 
-        arm_pos = getTopCoordinate(window_loc, templates[unit[1]], scr_shot)
+        arm_pos = getCoordinate(
+            window_loc, templates[unit[1]], scr_shot, pos="top")
         if arm_pos:
             logger.info(f"放{unit[0]}")
             moveThenClick(ms, arm_pos)
@@ -226,7 +217,7 @@ def attack(
             scr_shot = ImageGrab.grab(window_loc)
             scr_shot = np.array(scr_shot)
             result = ocr.ocr(
-                scr_shot[: round(1 / 3 * h), round(1 / 3 * w) : round(2 / 3 * w), :]
+                scr_shot[: round(1 / 3 * h), round(1 / 3 * w): round(2 / 3 * w), :]
             )
             if result[0]:
                 for line in result[0]:
@@ -235,9 +226,10 @@ def attack(
                         break
             if second_phase:
                 break
-            matchThenClick(ms, templates["machine_skill"], window_loc, mid=False)
+            matchThenClick(
+                ms, templates["machine_skill"], window_loc, mid=False)
             time.sleep(2)
-            pbar.update(round((time.time() - last_time), 1))
+            pbar.update(round(time.time() - last_time, 1))
             last_time = time.time()
             pbar.set_description(
                 f"第1阶段进攻中：{(time.time() - start_time):.1f}/{BATTLE_TIME}秒"
@@ -256,16 +248,17 @@ def attack(
                 logger.info(f"第2阶段进攻结束，用时：{time.time() - start_time:.1f}秒")
                 logger.info("回营")
                 return
-            matchThenClick(ms, templates["machine_skill"], window_loc, mid=False)
+            matchThenClick(
+                ms, templates["machine_skill"], window_loc, mid=False)
             time.sleep(2)
-            pbar.update(round((time.time() - last_time), 1))
+            pbar.update(round(time.time() - last_time, 1))
             last_time = time.time()
             pbar.set_description(
                 f"第2阶段进攻中：{(time.time() - start_time):.1f}/{BATTLE_TIME}秒"
             )
 
 
-def attackWithNoArms(
+def attackThenRetreat(
     kb: pynput.keyboard.Controller,
     ms: pynput.mouse.Controller,
     window_loc: tuple[int, int, int, int],
@@ -282,10 +275,9 @@ def attackWithNoArms(
             if not attack_pos:
                 logThenExit("未找到进攻按钮", "no_attack.png")
             moveThenClick(ms, attack_pos)
-            time.sleep(1)
-            if not matchThenClick(ms, templates["search"], window_loc):
+            if not waitUntilMatchThenClick(ms, templates["search"], window_loc, timeout=2):
                 logThenExit("未找到搜索按钮", "no_search.png")
-            if waitUntilMatch(ocr, window_loc):  # 找到对手
+            if matchOpponent(ocr, window_loc):  # 找到对手
                 find = True
                 break
             else:  # 规定时间内未找到对手
@@ -307,15 +299,9 @@ def attackWithNoArms(
     zoomOut(kb, ms, mid_pos)
 
     # 屏幕下移
-    for _ in range(3):
-        ms.position = mid_pos
-        pyautogui.mouseDown()
-        time.sleep(0.1)
-        pyautogui.moveTo(mid_pos[0], mid_pos[1] - 200, duration=0.2)
-        time.sleep(0.1)
-        pyautogui.mouseUp()
+    shiftScreen(mid_pos, -3)
     # 放一个兵
-    arm_pos = getTopCoordinate(window_loc, templates[UNITS[unit]])
+    arm_pos = getCoordinate(window_loc, templates[UNITS[unit]], pos="top")
     if arm_pos:
         logger.info(f"放{unit}")
         moveThenClick(ms, arm_pos)
@@ -325,12 +311,9 @@ def attackWithNoArms(
         for _ in range(1):
             ms.click(pynput.mouse.Button.left)
             time.sleep(0.2)
-    time.sleep(1)
-    if matchThenClick(ms, templates["giveup"], window_loc):
-        time.sleep(1)
-        if matchThenClick(ms, templates["giveup_confirm"], window_loc):
-            time.sleep(1)
-            if matchThenClick(ms, templates["backhome"], window_loc):
+    if waitUntilMatchThenClick(ms, templates["giveup"], window_loc, timeout=2):
+        if waitUntilMatchThenClick(ms, templates["giveup_confirm"], window_loc, timeout=2):
+            if waitUntilMatchThenClick(ms, templates["backhome"], window_loc, timeout=2):
                 logger.info("回营")
                 return
             else:
@@ -368,7 +351,8 @@ def main(collect_interval=4, execute_time=3.0, unit="龙", number=4):
             zoomOut(keyboard, mouse, ((left + right) // 2, (top + bottom) // 2))
             # 进攻
             attack(
-                keyboard, mouse, window_loc, ocr, TEMPLATES, (unit, UNITS[unit]), number
+                keyboard, mouse, window_loc, ocr, TEMPLATES, (
+                    unit, UNITS[unit]), number
             )
             time.sleep(6)
             # 检查是否弹出胜利之星奖励
@@ -401,7 +385,7 @@ if __name__ == "__main__":
     src = ImageGrab.grab(window_loc)
     src = np.array(src)
     src = cv2.cvtColor(cv2.imread("test.png"), cv2.COLOR_BGR2RGB)
-    pos = getMidCoordinate((left, top, right, bottom), template, src)
+    pos = getCoordinate((left, top, right, bottom), template, src)
     if pos:
         mouse.position = pos
     else:

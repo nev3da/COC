@@ -82,3 +82,24 @@ QStatusBar {
     color: #4a5568;
     border-top: 2px solid #e2e8f0;
 }
+ 
+QSpinBox {
+    background: rgba(255,255,255,0.9);
+    border: 2px solid #cbd5e0;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 12pt;
+    color: #2d3748;
+    selection-background-color:rgb(114, 132, 155);
+}
+
+QSpinBox:hover {
+    border-color: #a0aec0;
+    background: rgba(255,255,255,1);
+}
+
+QSpinBox::up-button:hover, QSpinBox::down-button:hover {
+    border-radius: 4px;
+    border: 2px solidrgb(65, 72, 78);
+    color: white;
+}
