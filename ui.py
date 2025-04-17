@@ -159,7 +159,7 @@ class Ui_MainWindow(object):
         self.number.setSizePolicy(sizePolicy)
         self.number.setMaximumSize(QtCore.QSize(80, 16777215))
         self.number.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-        self.number.setProperty("value", 7)
+        self.number.setProperty("value", 8)
         self.number.setObjectName("number")
         self.horizontalLayout_2.addWidget(self.number)
         spacerItem8 = QtWidgets.QSpacerItem(133, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)

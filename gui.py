@@ -90,7 +90,7 @@ class ScriptThread(QThread):
                         f"已执行时间：[{int(hours)}h{int(minutes)}min{int(seconds)}s/{int(self.execute_time / 3600)}h]"
                     )
         except Exception as e:
-            pass
+            print(e)
         finally:
             self.finish_sig.emit()
 
