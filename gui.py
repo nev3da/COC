@@ -44,7 +44,8 @@ class ScriptThread(QThread):
 
     def run(self):
         try:
-            ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
+            ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False,
+                            det_model_dir="./paddlemodels/det/ch/h_PP-OCRv4_det_infer", rec_model_dir="./paddlemodels/rec/ch/ch_PP-OCRv4_rec_infer", cls_model_dir="./paddlemodels/cls/ch_ppocr_mobile_v2.0_cls_infer")
             keyboard = pynput.keyboard.Controller()
             mouse = pynput.mouse.Controller()
             window_loc = getWindowLocation(self.window_name)[1]
