@@ -3,3 +3,6 @@ log/
 test.py
 .idea/
 no_*.png
+build/
+dist/
+*.spec

@@ -16,7 +16,8 @@ from PIL import ImageGrab
 from log import logger
 import pyautogui
 from PyQt5.QtCore import QThread
-
+import os
+import sys
 
 def saveScreen(img_name):
     scr_shot = ImageGrab.grab()
@@ -85,7 +86,9 @@ def shiftScreen(mid_pos: tuple[int, int], times: int = 4):
 
 
 def moveThenClick(
-    ms: pynput.mouse.Controller, pos: tuple[int, int], duration: float = 0.1
+    ms: pynput.mouse.Controller,
+    pos: tuple[int, int],
+    duration: float = 0.1
 ):
     ms.position = pos
     time.sleep(duration)
@@ -131,12 +134,7 @@ def matchThenClick(
     window_loc: tuple[int, int, int, int],
     mid: bool = True,
 ):
-    pos = (
-        getCoordinate(window_loc, template)
-        if mid
-        else getCoordinate(window_loc, template, pos="bottom")
-    )
-
+    pos = getCoordinate(window_loc, template) if mid else getCoordinate(window_loc, template, pos="bottom")
     if pos:
         moveThenClick(ms, pos)
         time.sleep(1)
@@ -169,5 +167,15 @@ def logThenExit(msg: str, img_name: str, quit: bool = True):
         logger.warning(msg)
 
 
+def resource_path(relative_path: str) -> str:
+    """Get the absolute path to the resource, works for dev and for PyInstaller"""
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+
 if __name__ == "__main__":
-    print(type(abs(4)))
+    print(dir(sys))

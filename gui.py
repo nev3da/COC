@@ -45,7 +45,10 @@ class ScriptThread(QThread):
     def run(self):
         try:
             ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False,
-                            det_model_dir="./paddlemodels/det/ch/h_PP-OCRv4_det_infer", rec_model_dir="./paddlemodels/rec/ch/ch_PP-OCRv4_rec_infer", cls_model_dir="./paddlemodels/cls/ch_ppocr_mobile_v2.0_cls_infer")
+                            det_model_dir=resource_path("./paddlemodels/det/ch/h_PP-OCRv4_det_infer"),
+                            rec_model_dir=resource_path("./paddlemodels/rec/ch/ch_PP-OCRv4_rec_infer"),
+                            cls_model_dir=resource_path("./paddlemodels/cls/ch_ppocr_mobile_v2.0_cls_infer")
+                            )
             keyboard = pynput.keyboard.Controller()
             mouse = pynput.mouse.Controller()
             window_loc = getWindowLocation(self.window_name)[1]
@@ -115,7 +118,7 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
                 self.btn.setEnabled(False)
 
         self.btn.clicked.connect(scriptEvent)
-        self.setWindowIcon(QIcon("avatar.ico"))
+        self.setWindowIcon(QIcon(resource_path("avatar.ico")))
 
     def begin(self):
         window_name = self.window_name_label.text()
@@ -151,11 +154,10 @@ if __name__ == "__main__":
     event = threading.Event()
     app = QApplication(sys.argv)
     try:
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-            "cocscript")
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("cocscript")
     except Exception as e:
         logger.error(e)
-    with open("style.qss", "r", encoding="utf-8") as file:
+    with open(resource_path("style.qss"), "r", encoding="utf-8") as file:
         app.setStyleSheet(file.read())
     window = MainUi()
     window.show()

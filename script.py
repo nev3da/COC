@@ -377,9 +377,7 @@ if __name__ == "__main__":
     window_loc = getWindowLocation(title="MuMu模拟器12")[1]
     left, top, right, bottom = window_loc
     time.sleep(1)
-    template = cv2.cvtColor(
-        cv2.imread(os.path.join(ARM_DIR, "dragon.png")), cv2.COLOR_BGR2RGB
-    )
+    template = cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, "dragon.png"))), cv2.COLOR_BGR2RGB)
     # src = ImageGrab.grab((left, top, right, bottom))
     # src = np.array(src)
     src = ImageGrab.grab(window_loc)
