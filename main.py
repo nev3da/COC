@@ -185,11 +185,12 @@ class DayThread(QThread):
             window_loc = getWindowLocation(self.window_name)[1]
             left, top, right, bottom = window_loc
             start_time = time.time()
-            battle_num = 0
+            battle_num = 1
             # 练兵
             day_script.buildArmy(mouse, window_loc, day_keywords.TEMPLATES, self.number)
             while True:
                 logger.info(f'即将开始第{battle_num}场战斗')
+                battle_num += 1
                 # 缩小视野至最小
                 zoomOut(keyboard, mouse, ((left + right) // 2, (top + bottom) // 2))
                 # 进攻

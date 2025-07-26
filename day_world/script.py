@@ -221,7 +221,11 @@ def attack(
             if time.time() - destruction_time > 10:
                 if matchTemplateThenClick(ms, templates["end_fight"], window_loc):
                     if waitUntilMatchThenClick(ms, templates["end_fight_confirm"], window_loc, timeout=3):
-                        return
+                        if waitUntilMatchThenClick(ms, templates["victory_back"], window_loc, timeout=3):
+                            logger.info("摧毁率超过10秒没有变化，结束战斗")
+                            return
+                        else:
+                            logThenExit("未找到回营按钮")
                     else:
                         logThenExit("未找到结束战斗确认按钮", "no_end_fight_confirm.png")
                 else:
@@ -229,13 +233,19 @@ def attack(
             if matchTemplateThenClick(ms, templates["victory_back"], window_loc):
                 logger.info("战斗结束，回营")
                 return
+            img_dir = 'imgs'
+            if not os.path.exists(img_dir):
+                os.makedirs(img_dir)
             scr_shot = ImageGrab.grab(window_loc)
-            scr_shot = np.array(scr_shot)[700:740, 1480:1547, :]
+            cv2.imwrite(f'{img_dir}/whole_{time.strftime("%Y%m%d_%H%M%S")}.png', np.array(scr_shot))
+            scr_shot = np.array(scr_shot)[round(h * 1/2):, round(w * 2/3):, :]
+            cv2.imwrite(f'{img_dir}/{time.strftime("%Y%m%d_%H%M%S")}.png', scr_shot)
             result = ocr.predict(scr_shot)
             if result[0] and result[0]['rec_texts']:
-                if destruction_rate != result[0]['rec_texts'][0]:
-                    destruction_rate = result[0]['rec_texts'][0]
-                    destruction_time = time.time()
+                for text in result[0]['rec_texts']:
+                    if '%' in text or '％' in text:
+                        destruction_rate = text.split('%')[0]
+                        destruction_time = time.time()
             time.sleep(1)
             pbar.update(round(time.time() - last_time, 1))
             last_time = time.time()

@@ -6,3 +6,5 @@ no_*.png
 build/
 dist/
 *.spec
+config.json
+screenshots/
