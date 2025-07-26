@@ -1,1 +1,0 @@
-pyinstaller --add-data "common;common" --add-data "day_world;day_world" --add-data "night_world;night_world"  --add-data "style.qss;." -i avatar.ico main.py

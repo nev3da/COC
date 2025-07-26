@@ -225,6 +225,7 @@ def attack(
                 if matchTemplateThenClick(ms, templates["end_fight"], window_loc):
                     if waitUntilMatchThenClick(ms, templates["end_fight_confirm"], window_loc, timeout=3):
                         if waitUntilMatchThenClick(ms, templates["victory_back"], window_loc, timeout=3):
+                            pbar.close()
                             logger.info("摧毁率超过10秒没有变化，结束战斗")
                             return
                         else:
@@ -234,6 +235,7 @@ def attack(
                 else:
                     logThenExit("未找到结束战斗按钮", "no_end_fight.png")
             if matchTemplateThenClick(ms, templates["victory_back"], window_loc):
+                pbar.close()
                 logger.info("战斗结束，回营")
                 return
             # img_dir = 'imgs'

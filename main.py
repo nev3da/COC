@@ -162,12 +162,12 @@ class DayThread(QThread):
     def __init__(
         self,
         window_name,
-        execute_time=2.0,
+        execute_time=30.0,
         number=280,
     ):
         super(DayThread, self).__init__()
         self.window_name = window_name
-        self.execute_time = execute_time * 60 * 60
+        self.execute_time = execute_time * 60
         self.number = number // 20
 
     def run(self):
@@ -210,9 +210,8 @@ class DayThread(QThread):
                     break
                 else:
                     elapsed_time = time.time() - start_time
-                    hours, remainder = divmod(elapsed_time, 3600)
-                    minutes, seconds = divmod(remainder, 60)
-                    logger.info(f"已执行时间：[{int(hours)}h{int(minutes)}min{int(seconds)}s/{int(self.execute_time / 3600)}h]")
+                    minutes, seconds = divmod(elapsed_time, 60)
+                    logger.info(f"已执行时间：[{int(minutes)}min{int(seconds)}s/{int(self.execute_time / 60)}min]")
         except Exception as e:
             print(e)
         finally:
