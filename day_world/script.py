@@ -156,7 +156,7 @@ def attack(
         moveThenClick(ms, queen)
         time.sleep(0.5)
         moveThenClick(ms, queen_pos)
-        # 放技能
+        # 放技能（穿云箭）
         time.sleep(0.5)
         moveThenClick(ms, queen)
     # 放蛮王
@@ -165,9 +165,6 @@ def attack(
         moveThenClick(ms, bbrking)
         time.sleep(0.5)
         moveThenClick(ms, bbrking_pos)
-        # 放技能
-        time.sleep(0.5)
-        moveThenClick(ms, bbrking)
     # 放龙
     dragons_pos = generate_gaussian_points(*queen_pos, *bbrking_pos, *warden_pos, num_points=number)
     dragon = getTemplatePos(window_loc, templates["dragon"])
@@ -200,7 +197,7 @@ def attack(
             moveThenClick(ms, pos)
             time.sleep(0.1)
     # 等待几秒
-    time.sleep(7)
+    time.sleep(5)
     # 大守护者放技能（金身）
     if grand_warden:
         moveThenClick(ms, grand_warden)
@@ -208,6 +205,12 @@ def attack(
     # 飞盾战神放技能（火箭长矛）
     if royal_champion:
         moveThenClick(ms, royal_champion)
+    time.sleep(0.5)
+    # 再等待几秒
+    time.sleep(5)
+    # 蛮王放技能（足球）
+    if bbrking:
+        moveThenClick(ms, bbrking)
     time.sleep(0.5)
     ms.position = mid_pos
     
@@ -233,19 +236,20 @@ def attack(
             if matchTemplateThenClick(ms, templates["victory_back"], window_loc):
                 logger.info("战斗结束，回营")
                 return
-            img_dir = 'imgs'
-            if not os.path.exists(img_dir):
-                os.makedirs(img_dir)
+            # img_dir = 'imgs'
+            # if not os.path.exists(img_dir):
+            #     os.makedirs(img_dir)
             scr_shot = ImageGrab.grab(window_loc)
-            cv2.imwrite(f'{img_dir}/whole_{time.strftime("%Y%m%d_%H%M%S")}.png', np.array(scr_shot))
+            # cv2.imwrite(f'{img_dir}/whole_{time.strftime("%Y%m%d_%H%M%S")}.png', np.array(scr_shot))
             scr_shot = np.array(scr_shot)[round(h * 1/2):, round(w * 2/3):, :]
-            cv2.imwrite(f'{img_dir}/{time.strftime("%Y%m%d_%H%M%S")}.png', scr_shot)
+            # cv2.imwrite(f'{img_dir}/{time.strftime("%Y%m%d_%H%M%S")}.png', scr_shot)
             result = ocr.predict(scr_shot)
             if result[0] and result[0]['rec_texts']:
                 for text in result[0]['rec_texts']:
                     if '%' in text or '％' in text:
-                        destruction_rate = text.split('%')[0]
-                        destruction_time = time.time()
+                        if destruction_rate != text.split('%')[0]:
+                            destruction_rate = text.split('%')[0]
+                            destruction_time = time.time()
             time.sleep(1)
             pbar.update(round(time.time() - last_time, 1))
             last_time = time.time()
