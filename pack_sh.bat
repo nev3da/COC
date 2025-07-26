@@ -1,1 +1,1 @@
-pyinstaller --add-data "arm_imgs;arm_imgs" --add-data "control_imgs;control_imgs" --add-data "resource_imgs;resource_imgs" --add-data "paddlemodels;paddlemodels" --add-data "style.qss;." --add-data "C:\Miniconda3\Lib\site-packages\Cython\Utility;Cython/Utility" --collect-all paddleocr -i avatar.ico gui.py
+pyinstaller --add-data "common;common" --add-data "day_world;day_world" --add-data "night_world;night_world"  --add-data "style.qss;." -i avatar.ico main.py
