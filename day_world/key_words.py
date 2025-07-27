@@ -33,6 +33,7 @@ TEMPLATES = {
     'bbrking': cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, 'bbrking.png'))), cv2.COLOR_BGR2RGB),
     'grand_warden': cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, 'grand_warden.png'))), cv2.COLOR_BGR2RGB),
     'royal_champion': cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, 'royal_champion.png'))), cv2.COLOR_BGR2RGB),
+    'minion_prince': cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, 'minion_prince.png'))), cv2.COLOR_BGR2RGB),
     'dragon': cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, 'dragon.png'))), cv2.COLOR_BGR2RGB),
     'lightning': cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, 'lightning.png'))), cv2.COLOR_BGR2RGB),
     'rage': cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, 'rage.png'))), cv2.COLOR_BGR2RGB),

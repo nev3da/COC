@@ -180,7 +180,12 @@ def attack(
         moveThenClick(ms, grand_warden)
         time.sleep(0.5)
         moveThenClick(ms, warden_pos)
-    # TODO: 放亡灵王子
+    # 放亡灵王子
+    minion_prince = getTemplatePos(window_loc, templates["minion_prince"])
+    if minion_prince:
+        moveThenClick(ms, minion_prince)
+        time.sleep(0.5)
+        moveThenClick(ms, warden_pos)
     # 放飞盾战神
     royal_champion = getTemplatePos(window_loc, templates["royal_champion"])
     if royal_champion:
@@ -211,6 +216,11 @@ def attack(
     # 蛮王放技能（足球）
     if bbrking:
         moveThenClick(ms, bbrking)
+    # 再等待几秒
+    time.sleep(2)
+    # 亡灵王子放技能（减速法球）
+    if minion_prince:
+        moveThenClick(ms, minion_prince)
     time.sleep(0.5)
     ms.position = mid_pos
     
@@ -248,10 +258,9 @@ def attack(
             result = ocr.predict(scr_shot)
             if result[0] and result[0]['rec_texts']:
                 for text in result[0]['rec_texts']:
-                    if '%' in text or '％' in text:
-                        if destruction_rate != text.split('%')[0]:
-                            destruction_rate = text.split('%')[0]
-                            destruction_time = time.time()
+                    if '%' in text and destruction_rate != text.split('%')[0]:
+                        destruction_rate = text.split('%')[0]
+                        destruction_time = time.time()
             time.sleep(1)
             pbar.update(round(time.time() - last_time, 1))
             last_time = time.time()

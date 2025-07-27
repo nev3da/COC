@@ -19,7 +19,7 @@ cmd = [
     "--add-data", "day_world;day_world",
     "--add-data", "night_world;night_world",
     "--add-data", "style.qss;.",
-    "--add-data", "C:\\Anaconda\\anaconda\\Lib\\site-packages\\Cython\\Utility;Cython/Utility",
+    "--add-data", "C:\\Miniconda3\\Lib\\site-packages\\Cython\\Utility;Cython/Utility",
     "--icon", "avatar.ico",
     "--collect-data", "paddlex",
     "--collect-binaries", "paddle"
