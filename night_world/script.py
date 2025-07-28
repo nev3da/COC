@@ -15,7 +15,12 @@ from night_world.key_words import *
 from common.utils import *
 
 
-def collect(kb, ms, window_loc, templates):
+def collect(
+    kb: pynput.keyboard.Controller,
+    ms: pynput.mouse.Controller,
+    window_loc: tuple[int, int, int, int],
+    templates: dict[str, np.ndarray]
+):
     left, top, right, bottom = window_loc
     mid_pos = ((left + right) // 2, (top + bottom) // 2)
     zoomOut(kb, ms, mid_pos)
@@ -64,7 +69,10 @@ def collect(kb, ms, window_loc, templates):
 
 
 # 进攻按钮是半透明的，所以没用模板匹配，而是用OCR识别
-def getAttackPos(window_loc, ocr):
+def getAttackPos(
+    window_loc: tuple[int, int, int, int],
+    ocr: PaddleOCR
+):
     left, top, right, bottom = window_loc
     w, h = right - left, bottom - top
     scr_shot = ImageGrab.grab(window_loc)
@@ -84,7 +92,11 @@ def getAttackPos(window_loc, ocr):
     return None
 
 
-def matchOpponent(ocr, window_loc, time_limit=20.0):
+def matchOpponent(
+    ocr: PaddleOCR,
+    window_loc: tuple[int, int, int, int],
+    time_limit: float = 20.0
+):
     time.sleep(1)
     left, top, right, bottom = window_loc
     w, h = right - left, bottom - top

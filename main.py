@@ -17,7 +17,7 @@ from paddleocr import PaddleOCR
 import cv2
 import os
 from PyQt5.QtWidgets import QApplication, QMainWindow
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal, Qt
 from PyQt5.QtGui import QIcon
 import threading
 import pynput
@@ -31,7 +31,12 @@ COMMON_DIR = 'common'
 
 
 class ScreenshotThread(Thread):
-    def __init__(self, window_name, save_dir="screenshots", interval=0):
+    def __init__(
+        self,
+        window_name: str,
+        save_dir: str = "screenshots",
+        interval: int = 0
+    ):
         super().__init__()
         # self.daemon = True
         self.window_name = window_name
@@ -85,12 +90,12 @@ class NightThread(QThread):
 
     def __init__(
         self,
-        window_name,
-        collect_interval_1=4,
-        collect_interval_2=0,
-        execute_time=3.0,
-        unit="龙",
-        number=4,
+        window_name: str,
+        collect_interval_1: int = 4,
+        collect_interval_2: int = 0,
+        execute_time: float = 3.0,
+        unit: str = "龙",
+        number: int = 4,
     ):
         super(NightThread, self).__init__()
         self.window_name = window_name
@@ -161,17 +166,26 @@ class DayThread(QThread):
 
     def __init__(
         self,
-        window_name,
-        execute_time=30.0,
-        number=280,
+        window_name: str,
+        execute_time: float,
+        number: int,
+        gold: int,
+        elixir: int,
+        oil: int,
+        event: threading.Event
     ):
         super(DayThread, self).__init__()
         self.window_name = window_name
         self.execute_time = execute_time * 60
         self.number = number // 20
+        self.gold = gold
+        self.elixir = elixir
+        self.oil = oil
+        self.e = event
 
     def run(self):
         try:
+            logger.info("加载模型中...")
             ocr = PaddleOCR(use_textline_orientation=False,
                             use_doc_orientation_classify=False,
                             use_doc_unwarping=False,
@@ -194,7 +208,7 @@ class DayThread(QThread):
                 # 缩小视野至最小
                 zoomOut(keyboard, mouse, ((left + right) // 2, (top + bottom) // 2))
                 # 进攻
-                day_script.attack(keyboard, mouse, window_loc, ocr, day_keywords.TEMPLATES, self.number)
+                day_script.attack(keyboard, mouse, window_loc, ocr, day_keywords.TEMPLATES, self.number, (self.gold, self.elixir, self.oil), self.e)
                 if event.is_set():
                     break
                 time.sleep(5)
@@ -268,6 +282,9 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
             self.night_number.setValue(config.get("night_number", 8))
             self.day_execute_time.setValue(config.get("day_execute_time", 2))
             self.day_number.setText(config.get("day_number", ""))
+            self.gold.setText(formatInt(config.get("gold", "")))
+            self.elixir.setText(formatInt(config.get("elixir", "")))
+            self.oil.setText(formatInt(config.get("oil", "")))
         except FileNotFoundError:
             logger.warning("配置文件不存在，使用默认设置")
         except Exception as e:
@@ -290,6 +307,10 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
             self.window_name_label.text(),
             float(self.day_execute_time.text()),
             int(self.day_number.text()),
+            int(self.gold.text().replace(' ', '')),
+            int(self.elixir.text().replace(' ', '')),
+            int(self.oil.text().replace(' ', '')),
+            event
         )
         self.script_thread.finish_sig.connect(self.finished)
         self.script_thread.start()
@@ -331,7 +352,10 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
             "unit": self.unit.currentIndex(),  # 或 self.unit.currentText()
             "night_number": self.night_number.value(),
             "day_execute_time": self.day_execute_time.value(),
-            "day_number": self.day_number.text()
+            "day_number": self.day_number.text(),
+            "gold": self.gold.text().replace(' ', ''),
+            "elixir": self.elixir.text().replace(' ', ''),
+            "oil": self.oil.text().replace(' ', ''),
         }
         with open("config.json", "w", encoding="utf-8") as f:
             json.dump(config, f, indent=4, ensure_ascii=False)

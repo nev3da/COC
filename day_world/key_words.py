@@ -20,9 +20,11 @@ TEMPLATES = {
     'build_rage': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'build_rage.png'))), cv2.COLOR_BGR2RGB),
     'build_lightning': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'build_lightning.png'))), cv2.COLOR_BGR2RGB),
     'build_bat': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'build_bat.png'))), cv2.COLOR_BGR2RGB),
+    'build_airship': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'build_airship.png'))), cv2.COLOR_BGR2RGB),
     'build_end': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'build_end.png'))), cv2.COLOR_BGR2RGB),
     'search': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'search.png'))), cv2.COLOR_BGR2RGB),
     'found': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'found.png'))), cv2.COLOR_BGR2RGB),
+    'next': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'next.png'))), cv2.COLOR_BGR2RGB),
     'backhome': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'backhome.png'))), cv2.COLOR_BGR2RGB),
     'end_fight': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'end_fight.png'))), cv2.COLOR_BGR2RGB),
     'end_fight_confirm': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'end_fight_confirm.png'))), cv2.COLOR_BGR2RGB),
@@ -38,6 +40,9 @@ TEMPLATES = {
     'lightning': cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, 'lightning.png'))), cv2.COLOR_BGR2RGB),
     'rage': cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, 'rage.png'))), cv2.COLOR_BGR2RGB),
     'bat': cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, 'bat.png'))), cv2.COLOR_BGR2RGB),
+    'airship': cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, 'airship.png'))), cv2.COLOR_BGR2RGB),
+    'switch': cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, 'switch.png'))), cv2.COLOR_BGR2RGB),
+    'switch_airship': cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, 'switch_airship.png'))), cv2.COLOR_BGR2RGB),
 }
 
 if __name__ == '__main__':

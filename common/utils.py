@@ -21,7 +21,7 @@ import sys
 from paddleocr import PaddleOCR
 
 
-def saveScreen(img_name):
+def saveScreen(img_name: str):
     scr_shot = ImageGrab.grab()
     scr_shot = np.array(scr_shot)
     cv2.imwrite(img_name, cv2.cvtColor(scr_shot, cv2.COLOR_RGB2BGR))
@@ -71,7 +71,10 @@ def zoomOut(
     kb.release(pynput.keyboard.Key.ctrl)
 
 
-def shiftScreen(mid_pos: tuple[int, int], times: int = 4):
+def shiftScreen(
+    mid_pos: tuple[int, int],
+    times: int = 4
+):
     for _ in range(abs(times)):
         # move cursor
         pyautogui.moveTo(mid_pos[0], mid_pos[1], duration=0.01)
@@ -219,7 +222,11 @@ def waitUntilOcrThenClick(
         time.sleep(interval)
 
 
-def logThenExit(msg: str, img_name: str, quit: bool = True):
+def logThenExit(
+    msg: str, 
+    img_name: str, 
+    quit: bool = True
+):
     # saveScreen(img_name)
     if quit:
         logger.critical(msg)
@@ -237,17 +244,26 @@ def resource_path(relative_path: str) -> str:
 
     return os.path.join(base_path, relative_path)
 
-def generate_gaussian_points(x1, y1, x2, y2, x0, y0, num_points=11):
+
+def generate_gaussian_points(
+    x1: int,
+    y1: int,
+    x2: int,
+    y2: int,
+    x0: int,
+    y0: int,
+    num_points: int = 11
+):
     # 向量方向和长度
     vec = np.array([x2 - x1, y2 - y1])
     length = np.linalg.norm(vec)
     if length == 0:
         return [(x0, y0)] * num_points
 
-    unit_vec = vec / length  # 单位向量
-
-    std = length / 4  # 2σ = 半个长度 → σ = length/4
-
+    # 单位向量
+    unit_vec = vec / length 
+    # 2σ = 半个长度 → σ = length/4
+    std = length / 4   
     # 从正态分布采样一维偏移量
     t_values = np.random.normal(loc=0, scale=std, size=num_points)
 
@@ -261,6 +277,14 @@ def generate_gaussian_points(x1, y1, x2, y2, x0, y0, num_points=11):
         points.append(tuple(np.round(pt).astype(int)))
 
     return points
+
+def formatInt(n: int) -> str:
+    s = str(n)
+    parts = []
+    while s:
+        parts.insert(0, s[-3:])
+        s = s[:-3]
+    return ' '.join(parts)
 
 
 if __name__ == "__main__":
