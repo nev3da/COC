@@ -107,6 +107,7 @@ class NightThread(QThread):
 
     def run(self):
         try:
+            logger.info("加载模型中...")
             ocr = PaddleOCR(use_textline_orientation=False,
                             use_doc_orientation_classify=False,
                             use_doc_unwarping=False,

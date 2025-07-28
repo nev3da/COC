@@ -157,17 +157,17 @@ def detectOpponentResources(
         # print(line)
         idx += 1
         if idx == 1:
-            op_gold = int(line.replace(' ', '').replace('.', ''))
+            op_gold = int(line.replace(' ', '').replace('.', '').replace(',', ''))
             if gold > op_gold:
                 logger.info(f"对手金币不足：{formatInt(op_gold)} < {formatInt(gold)}")
                 return False
         elif idx == 2:
-            op_elixir = int(line.replace(' ', '').replace('.', ''))
+            op_elixir = int(line.replace(' ', '').replace('.', '').replace(',', ''))
             if elixir > op_elixir:
                 logger.info(f"对手圣水不足：{formatInt(op_elixir)} < {formatInt(elixir)}")
                 return False
         elif idx == 3:
-            op_oil = int(line.replace(' ', '').replace('.', ''))
+            op_oil = int(line.replace(' ', '').replace('.', '').replace(',', ''))
             if oil > op_oil:
                 logger.info(f"对手黑油不足：{formatInt(op_oil)} < {formatInt(oil)}")
                 return False
