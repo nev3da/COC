@@ -27,6 +27,7 @@ TEMPLATES = {
     'next': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'next.png'))), cv2.COLOR_BGR2RGB),
     'backhome': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'backhome.png'))), cv2.COLOR_BGR2RGB),
     'end_fight': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'end_fight.png'))), cv2.COLOR_BGR2RGB),
+    'giveup': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'giveup.png'))), cv2.COLOR_BGR2RGB),
     'end_fight_confirm': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'end_fight_confirm.png'))), cv2.COLOR_BGR2RGB),
     'victory_back': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'victory_back.png'))), cv2.COLOR_BGR2RGB),
     'victory_star': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'victory_star.png'))), cv2.COLOR_BGR2RGB),

@@ -329,7 +329,10 @@ def attack(
         while True:
             # 摧毁率超过5秒没有变化
             if time.time() - destruction_time > 5:
-                if matchTemplateThenClick(ms, templates["end_fight"], window_loc):
+                end = matchTemplateThenClick(ms, templates["giveup"], window_loc)
+                if not end:
+                    end = matchTemplateThenClick(ms, templates["end_fight"], window_loc)
+                if end:
                     if waitUntilMatchThenClick(ms, templates["end_fight_confirm"], window_loc, timeout=3):
                         if waitUntilMatchThenClick(ms, templates["victory_back"], window_loc, timeout=3):
                             pbar.close()
@@ -341,7 +344,7 @@ def attack(
                     else:
                         logThenExit("未找到结束战斗确认按钮", "no_end_fight_confirm.png")
                 else:
-                    logThenExit("未找到结束战斗按钮", "no_end_fight.png")
+                    logThenExit("未找到放弃/结束战斗按钮", "no_end_fight.png")
             if matchTemplateThenClick(ms, templates["victory_back"], window_loc):
                 pbar.close()
                 logger.info("战斗结束，回营")
