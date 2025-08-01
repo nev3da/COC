@@ -153,30 +153,35 @@ def detectOpponentResources(
     # 识别资源
     idx = -math.inf
     result = ocr.predict(scr)
-    for line in result[0]['rec_texts']:
-        # print(line)
-        idx += 1
-        if idx == 1:
-            op_gold = int(line.replace(' ', '').replace('.', '').replace(',', ''))
-            if gold > op_gold:
-                logger.info(f"对手金币不足：{formatInt(op_gold)} < {formatInt(gold)}")
+    try:
+        for line in result[0]['rec_texts']:
+            # print(line)
+            idx += 1
+            if idx == 1:
+                op_gold = int(line.replace(' ', '').replace('.', '').replace(',', ''))
+                if gold > op_gold:
+                    logger.info(f"对手金币不足：{formatInt(op_gold)} < {formatInt(gold)}")
+                    return False
+            elif idx == 2:
+                op_elixir = int(line.replace(' ', '').replace('.', '').replace(',', ''))
+                if elixir > op_elixir:
+                    logger.info(f"对手圣水不足：{formatInt(op_elixir)} < {formatInt(elixir)}")
+                    return False
+            elif idx == 3:
+                op_oil = int(line.replace(' ', '').replace('.', '').replace(',', ''))
+                if oil > op_oil:
+                    logger.info(f"对手黑油不足：{formatInt(op_oil)} < {formatInt(oil)}")
+                    return False
+            elif idx == -math.inf:
+                pass
+            else:
                 return False
-        elif idx == 2:
-            op_elixir = int(line.replace(' ', '').replace('.', '').replace(',', ''))
-            if elixir > op_elixir:
-                logger.info(f"对手圣水不足：{formatInt(op_elixir)} < {formatInt(elixir)}")
-                return False
-        elif idx == 3:
-            op_oil = int(line.replace(' ', '').replace('.', '').replace(',', ''))
-            if oil > op_oil:
-                logger.info(f"对手黑油不足：{formatInt(op_oil)} < {formatInt(oil)}")
-                return False
-        elif idx == -math.inf:
-            pass
-        else:
-            return False
-        if '可获得的战利品' in line:
-            idx = 0
+            if '可获得的战利品' in line:
+                idx = 0
+    except Exception as e:
+        logger.error(f"资源检测失败：{e}")
+        return False
+    logger.info(f"对手资源：金币 {formatInt(op_gold)}, 圣水 {formatInt(op_elixir)}, 黑油 {formatInt(op_oil)}")
     return True
 
 
