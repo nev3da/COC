@@ -136,3 +136,16 @@ QTabBar::tab:selected {
 QTabBar::tab:!selected {
     color: #666666;
 }
+
+QRadioButton {
+    color: #4a5568;
+    font-family: "微软雅黑";
+    font-size: 12pt;
+}
+
+/* QLineEdit 禁用样式已在你的文件中定义 */
+QLineEdit:disabled {
+    background-color: #dddddd;
+    color: #999999;
+    border: 1px solid #aaaaaa;
+}
