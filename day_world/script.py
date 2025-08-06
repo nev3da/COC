@@ -231,7 +231,7 @@ def attack(
     # 开打
     zoomOut(kb, ms, mid_pos)
     shiftScreen(mid_pos, -3)
-    queen_pos = (left + 848, top + 744)
+    queen_pos = (left + 921, top + 745)
     bbrking_pos = (left + 1367, top + 355)
     warden_pos = ((queen_pos[0] + bbrking_pos[0]) // 2, (queen_pos[1] + bbrking_pos[1]) // 2)
     siege_weapon = True
@@ -333,7 +333,14 @@ def attack(
         destruction_rate = 0
         while True:
             # 摧毁率超过5秒没有变化
-            if time.time() - destruction_time > 5:
+            limit_time = 5
+            try:
+                rate = int(destruction_rate)
+                if rate > 97:
+                    limit_time = 10
+            except ValueError:
+                pass
+            if time.time() - destruction_time > limit_time:
                 end = matchTemplateThenClick(ms, templates["giveup"], window_loc)
                 if not end:
                     end = matchTemplateThenClick(ms, templates["end_fight"], window_loc)
@@ -391,7 +398,7 @@ def attackThenRetreat(
         result = ocr.predict(scr)
         if result[0] and result[0]['rec_texts']:
             cur_rank = result[0]['rec_texts']
-            print(cur_rank)
+            # print(cur_rank)
             # 应该只有一个检测结果，就是奖杯数
             if len(cur_rank) != 1:
                 return
@@ -421,7 +428,7 @@ def attackThenRetreat(
                     break
             zoomOut(kb, ms, mid_pos)
             shiftScreen(mid_pos, -2)
-            arm_pos = (left + 848, top + 744)
+            arm_pos = (left + 921, top + 745)
             # 放龙
             dragon = getTemplatePos(window_loc, templates["dragon"])
             if dragon:
