@@ -207,14 +207,15 @@ class DayThread(QThread):
             # 练兵
             day_script.buildArmy(mouse, window_loc, day_keywords.TEMPLATES, self.number)
             while True:
+                if event.is_set():
+                    logger.success("已手动停止")
+                    break
                 logger.info(f'即将开始第{battle_num}场战斗')
                 battle_num += 1
                 # 缩小视野至最小
                 zoomOut(keyboard, mouse, ((left + right) // 2, (top + bottom) // 2))
                 # 进攻
                 day_script.attack(keyboard, mouse, window_loc, ocr, day_keywords.TEMPLATES, self.number, (self.gold, self.elixir, self.oil), self.e)
-                if event.is_set():
-                    break
                 time.sleep(5)
                 # 检查是否弹出胜利之星奖励
                 logger.info("检查胜利之星")
