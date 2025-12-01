@@ -174,7 +174,6 @@ class DayThread(QThread):
         gold: int,
         elixir: int,
         oil: int,
-        rank: int,
         event: threading.Event
     ):
         super(DayThread, self).__init__()
@@ -184,7 +183,6 @@ class DayThread(QThread):
         self.gold = gold
         self.elixir = elixir
         self.oil = oil
-        self.rank = rank
         self.e = event
 
     def run(self):
@@ -201,7 +199,6 @@ class DayThread(QThread):
             keyboard = pynput.keyboard.Controller()
             mouse = pynput.mouse.Controller()
             window_loc = getWindowLocation(self.window_name)[1]
-            left, top, right, bottom = window_loc
             start_time = time.time()
             battle_num = 1
             # 练兵
@@ -212,19 +209,17 @@ class DayThread(QThread):
                     break
                 logger.info(f'即将开始第{battle_num}场战斗')
                 battle_num += 1
-                # 缩小视野至最小
-                zoomOut(keyboard, mouse, ((left + right) // 2, (top + bottom) // 2))
                 # 进攻
                 day_script.attack(keyboard, mouse, window_loc, ocr, day_keywords.TEMPLATES, self.number, (self.gold, self.elixir, self.oil), self.e)
                 time.sleep(5)
+                # 检查是否弹出宝箱（战场寻宝））
+                day_script.receive_chest(mouse, window_loc, day_keywords.TEMPLATES)
                 # 检查是否弹出胜利之星奖励
                 logger.info("检查胜利之星")
                 matchTemplateThenClick(mouse, day_keywords.TEMPLATES["victory_star"], window_loc)
                 if event.is_set():
                     logger.success("已手动停止")
                     break
-                if battle_num % 5 == 1:
-                    day_script.attackThenRetreat(keyboard, mouse, window_loc, ocr, day_keywords.TEMPLATES, self.rank)
                 # 判断是否到达执行时间，
                 if time.time() - start_time >= self.execute_time:
                     logger.success("已到达执行时间")
@@ -277,9 +272,6 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
         self.day_btn.clicked.connect(dayScriptEvent)
         self.setWindowIcon(QIcon(resource_path("avatar.ico")))
 
-        self.rank.setEnabled(self.radioButton.isChecked())
-        self.radioButton.toggled.connect(lambda checked: self.rank.setEnabled(checked))
-
     def load_config(self):
         try:
             with open("config.json", "r", encoding="utf-8") as f:
@@ -295,8 +287,6 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
             self.gold.setText(formatInt(config.get("gold", "")))
             self.elixir.setText(formatInt(config.get("elixir", "")))
             self.oil.setText(formatInt(config.get("oil", ""))),
-            self.rank.setText(str(config.get("rank", 2200)))
-            self.radioButton.setChecked(config.get("keep_rank", False))
         except FileNotFoundError:
             logger.warning("配置文件不存在，使用默认设置")
         except Exception as e:
@@ -322,7 +312,6 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
             int(self.gold.text().replace(' ', '')),
             int(self.elixir.text().replace(' ', '')),
             int(self.oil.text().replace(' ', '')),
-            int(self.rank.text()) if self.radioButton.isChecked() else math.inf,
             event
         )
         self.script_thread.finish_sig.connect(self.finished)
@@ -369,8 +358,6 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
             "gold": self.gold.text().replace(' ', ''),
             "elixir": self.elixir.text().replace(' ', ''),
             "oil": self.oil.text().replace(' ', ''),
-            "rank": self.rank.text(),
-            'keep_rank': self.radioButton.isChecked()
         }
         with open("config.json", "w", encoding="utf-8") as f:
             json.dump(config, f, indent=4, ensure_ascii=False)

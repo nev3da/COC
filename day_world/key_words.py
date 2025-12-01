@@ -31,6 +31,10 @@ TEMPLATES = {
     'end_fight_confirm': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'end_fight_confirm.png'))), cv2.COLOR_BGR2RGB),
     'victory_back': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'victory_back.png'))), cv2.COLOR_BGR2RGB),
     'victory_star': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'victory_star.png'))), cv2.COLOR_BGR2RGB),
+    'attack': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'attack.png'))), cv2.COLOR_BGR2RGB),
+    'receive_chest': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'receive_chest.png'))), cv2.COLOR_BGR2RGB),
+    'chest_hammer': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'chest_hammer.png'))), cv2.COLOR_BGR2RGB),
+    'continue_chest': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'continue_chest.png'))), cv2.COLOR_BGR2RGB),
 
     'archer_queen': cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, 'archer_queen.png'))), cv2.COLOR_BGR2RGB),
     'bbrking': cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, 'bbrking.png'))), cv2.COLOR_BGR2RGB),

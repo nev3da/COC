@@ -105,10 +105,13 @@ def getTemplatePos(
     scr_shot: np.ndarray = None,
     threshold: float = 0.95,
     pos: str = "mid",
+    crop: tuple[float, float, float, float] = (0.0, 1.0, 0.0, 1.0),
 ):
+    left, top, right, bottom = window_loc
+    w, h = right - left, bottom - top
     if scr_shot is None:
         scr_shot = ImageGrab.grab(window_loc)
-        scr_shot = np.array(scr_shot)
+        scr_shot = np.array(scr_shot)[round(h * crop[0]):round(h * crop[1]), round(w * crop[2]):round(w * crop[3]), :]
     res = cv2.matchTemplate(scr_shot, template, cv2.TM_CCOEFF_NORMED)
     _, max_val, _, max_loc = cv2.minMaxLoc(res)
     # print(max_val)
@@ -118,15 +121,15 @@ def getTemplatePos(
         x, y = max_loc
         if pos == "mid":
             return (
-                window_loc[0] + x + template.shape[1] // 2,
-                window_loc[1] + y + template.shape[0] // 2,
+                left + x + template.shape[1] // 2 + round(w * crop[2]),
+                top + y + template.shape[0] // 2 + round(h * crop[0]),
             )
         elif pos == "top":
-            return window_loc[0] + x + template.shape[1] // 2, window_loc[1] + y
+            return left + x + template.shape[1] // 2 + round(w * crop[2]), top + y + round(h * crop[0])
         elif pos == "bottom":
             return (
-                window_loc[0] + x + template.shape[1] // 2,
-                window_loc[1] + y + template.shape[0] + 30,
+                left + x + template.shape[1] // 2 + round(w * crop[2]),
+                top + y + template.shape[0] + 30 + round(h * crop[0]),
             )
         else:
             return None
@@ -164,8 +167,9 @@ def matchTemplateThenClick(
     template: np.ndarray,
     window_loc: tuple[int, int, int, int],
     mid: bool = True,
+    crop: tuple[float, float, float, float] = (0.0, 1.0, 0.0, 1.0),
 ):
-    pos = getTemplatePos(window_loc, template) if mid else getTemplatePos(window_loc, template, pos="bottom")
+    pos = getTemplatePos(window_loc, template, crop=crop) if mid else getTemplatePos(window_loc, template, pos="bottom", crop=crop)
     if pos:
         moveThenClick(ms, pos)
         time.sleep(1)
@@ -194,12 +198,13 @@ def waitUntilMatchThenClick(
     window_loc: tuple[int, int, int, int],
     interval: float = 0,
     timeout: float = 10.0,
+    crop: tuple[float, float, float, float] = (0.0, 1.0, 0.0, 1.0),
 ):
     start_time = time.time()
     while True:
         if time.time() - start_time > timeout:
             return False
-        if matchTemplateThenClick(ms, template, window_loc):
+        if matchTemplateThenClick(ms, template, window_loc, crop=crop):
             return True
         time.sleep(interval)
 

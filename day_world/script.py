@@ -12,9 +12,19 @@ import pickle
 from PyQt5.QtCore import QThread
 import math
 import threading
+import pynput
+import numpy as np
+from PIL import ImageGrab
+import cv2
+import win32con
+import win32gui
+import matplotlib.pyplot as plt
 
-from day_world.key_words import *
-from common.utils import *
+try:
+    from day_world.key_words import *
+    from common.utils import *
+except:
+    pass
 
 
 def buildArmy(
@@ -58,24 +68,6 @@ def buildArmy(
     # 建造法术
     moveThenClick(ms, (left + 963, top + 572))
     time.sleep(1)
-    # build_rage_pos = getTemplatePos(window_loc, templates["build_rage"])
-    # if not build_rage_pos:
-    #     logThenExit("未找到建造狂暴法术按钮", "no_build_rage.png")
-    # ms.position = build_rage_pos
-    # for _ in range(3):
-    #     ms.click(pynput.mouse.Button.left)
-    #     time.sleep(0.1)
-    # time.sleep(1)
-
-    # build_lightning_pos = getTemplatePos(window_loc, templates["build_lightning"])
-    # if not build_lightning_pos:
-    #     logThenExit("未找到建造闪电法术按钮", "no_build_lightning.png")
-    # ms.position = build_lightning_pos
-    # for _ in range(5):
-    #     ms.click(pynput.mouse.Button.left)
-    #     time.sleep(0.1)
-    # time.sleep(1)
-
     build_bat_pos = getTemplatePos(window_loc, templates["build_bat"])
     if not build_bat_pos:
         logThenExit("未找到建造蝙蝠法术按钮", "no_build_bat.png")
@@ -129,12 +121,12 @@ def matchOpponent(
         logger.info(f"正在匹配对手：[{time.time() - start_time:.2f}/{time_limit:.2f}]")
         scr_shot = ImageGrab.grab(window_loc)
         scr_shot = np.array(scr_shot)
-        result = ocr.predict(scr_shot[: round(1 / 3 * h), round(1 / 3 * w): round(2 / 3 * w), :])
+        result = ocr.predict(scr_shot[round(2 / 3 * h):, round(2 / 3 * w):, :])
         if not result[0]:
             time.sleep(1)
             continue
         for line in result[0]['rec_texts']:
-            if "开战倒计时" in line:
+            if "下一个" in line:
                 return True
 
 
@@ -201,10 +193,12 @@ def attack(
     h, w = bottom - top, right - left
     while True:
         find = False
-        if not matchOcrThenClick(ms, "进攻", ocr, window_loc, (2 / 3, 1.0, 0.0, 1 / 3)):
+        if not matchOcrThenClick(ms, "进攻", ocr, window_loc, (2 / 3, 1, 0, 1 / 3)):
             logThenExit("未找到进攻按钮", "no_attack.png")
-        if not waitUntilMatchThenClick(ms, templates["search"], window_loc, timeout=2):
+        if not waitUntilMatchThenClick(ms, templates["search"], window_loc, timeout=2, crop=(0, 1, 0, 1 / 3)):
             logThenExit("未找到搜索按钮", "no_search.png")
+        if not waitUntilMatchThenClick(ms, templates["attack"], window_loc, timeout=2, crop=(2 / 3, 1, 2 / 3, 1)):
+            logThenExit("未找到进攻按钮", "no_attack.png")
         # 找到对手
         while matchOpponent(ocr, window_loc):
             if event and event.is_set():
@@ -295,7 +289,7 @@ def attack(
         time.sleep(0.5)
         for pos in bats_pos:
             moveThenClick(ms, pos)
-            time.sleep(0.05)
+            time.sleep(0.1)
     # 放飞艇
     if siege_weapon:
         airship = getTemplatePos(window_loc, templates["airship"])
@@ -346,7 +340,8 @@ def attack(
                     end = matchTemplateThenClick(ms, templates["end_fight"], window_loc)
                 if end:
                     if waitUntilMatchThenClick(ms, templates["end_fight_confirm"], window_loc, timeout=3):
-                        if waitUntilMatchThenClick(ms, templates["victory_back"], window_loc, timeout=3):
+                        # 考虑战场寻宝活动
+                        if waitUntilMatchThenClick(ms, templates["victory_back"], window_loc, timeout=3) or waitUntilMatchThenClick(ms, templates["receive_chest"], window_loc, timeout=3):
                             pbar.close()
                             logger.info("摧毁率超过5秒没有变化，结束战斗")
                             ms.position = mid_pos
@@ -356,19 +351,21 @@ def attack(
                     else:
                         logThenExit("未找到结束战斗确认按钮", "no_end_fight_confirm.png")
                 else:
-                    logThenExit("未找到放弃/结束战斗按钮", "no_end_fight.png")
-            if matchTemplateThenClick(ms, templates["victory_back"], window_loc):
+                    # 可能刚到5或10秒时，战斗恰好结束了
+                    if waitUntilMatchThenClick(ms, templates["victory_back"], window_loc, timeout=2) or waitUntilMatchThenClick(ms, templates["receive_chest"], window_loc, timeout=2):
+                        pbar.close()
+                        logger.info("战斗结束，回营")
+                        ms.position = mid_pos
+                        return
+                    else:
+                        logThenExit("未找到放弃/结束战斗按钮", "no_end_fight.png")
+            if matchTemplateThenClick(ms, templates["victory_back"], window_loc) or matchTemplateThenClick(ms, templates["receive_chest"], window_loc):
                 pbar.close()
                 logger.info("战斗结束，回营")
                 ms.position = mid_pos
                 return
-            # img_dir = 'imgs'
-            # if not os.path.exists(img_dir):
-            #     os.makedirs(img_dir)
             scr_shot = ImageGrab.grab(window_loc)
-            # cv2.imwrite(f'{img_dir}/whole_{time.strftime("%Y%m%d_%H%M%S")}.png', np.array(scr_shot))
             scr_shot = np.array(scr_shot)[round(h * 1 / 2):, round(w * 2 / 3):, :]
-            # cv2.imwrite(f'{img_dir}/{time.strftime("%Y%m%d_%H%M%S")}.png', scr_shot)
             result = ocr.predict(scr_shot)
             if result[0] and result[0]['rec_texts']:
                 for text in result[0]['rec_texts']:
@@ -381,71 +378,90 @@ def attack(
             pbar.set_description(f"进攻中：{(time.time() - start_time):.1f}/{BATTLE_TIME}秒， 当前摧毁率：{destruction_rate}%")
 
 
-def attackThenRetreat(
-    kb: pynput.keyboard.Controller,
+def receive_chest(
     ms: pynput.mouse.Controller,
     window_loc: tuple[int, int, int, int],
-    ocr: PaddleOCR,
-    templates: dict[str, np.ndarray],
-    rank: int
+    templates: dict[str, np.ndarray]
 ):
-    left, top, right, bottom = window_loc
-    mid_pos = ((left + right) // 2, (top + bottom) // 2)
-    h, w = bottom - top, right - left
-    while True:
-        scr = ImageGrab.grab(window_loc)
-        scr = np.array(scr)[round(h * 5 / 28):round(h * 1 / 4), :round(1 / 7 * w), :]
-        result = ocr.predict(scr)
-        if result[0] and result[0]['rec_texts']:
-            cur_rank = result[0]['rec_texts']
-            # print(cur_rank)
-            # 应该只有一个检测结果，就是奖杯数
-            if len(cur_rank) != 1:
-                return
-            try:
-                cur_rank = int(cur_rank[0])
-                logger.info(f"当前奖杯：{cur_rank}，目标奖杯：{rank}")
-                if cur_rank <= rank:
-                    return
-            except Exception as e:
-                logger.error(f"奖杯检测失败：{e}")
-                return
-        # 连输5次
-        for _ in range(5):
-            while True:
-                if not matchOcrThenClick(ms, "进攻", ocr, window_loc, (2 / 3, 1.0, 0.0, 1 / 3)):
-                    logThenExit("未找到进攻按钮", "no_attack.png")
-                if not waitUntilMatchThenClick(ms, templates["search"], window_loc, timeout=2):
-                    logThenExit("未找到搜索按钮", "no_search.png")
-                # 规定时间内未找到对手
-                if not matchOpponent(ocr, window_loc):
-                    logger.warning(f"规定时间内没匹配到，退出重新搜索对手")
-                    if not matchTemplateThenClick(ms, templates["backhome"], window_loc):
-                        logThenExit("未找到回营按钮", "no_cancel.png")
-                    time.sleep(3)
-                else:
-                    logger.info("开始进攻")
-                    break
-            zoomOut(kb, ms, mid_pos)
-            shiftScreen(mid_pos, -2)
-            arm_pos = (left + 921, top + 745)
-            # 放龙
-            dragon = getTemplatePos(window_loc, templates["dragon"])
-            if dragon:
-                moveThenClick(ms, dragon)
-                time.sleep(0.5)
-                moveThenClick(ms, arm_pos)
-            if waitUntilMatchThenClick(ms, templates["giveup"], window_loc, timeout=2):
-                if waitUntilMatchThenClick(ms, templates["end_fight_confirm"], window_loc, timeout=2):
-                    if waitUntilMatchThenClick(ms, templates["victory_back"], window_loc, timeout=2):
-                        logger.info("回营")
-                        time.sleep(3)
-                    else:
-                        logThenExit("未找到回营按钮", "no_backhome.png")
-                else:
-                    logThenExit("未找到确认按钮", "giveup_confirm.png")
-            else:
-                logThenExit("未找到放弃按钮", "no_giveup.png")
+    if matchTemplateThenClick(ms, templates["chest_hammer"], window_loc):
+        time.sleep(0.5)
+        for _ in range(3):
+            ms.click(pynput.mouse.Button.left)
+            time.sleep(0.5)
+        if waitUntilMatchThenClick(ms, templates["continue_chest"], window_loc, timeout=5):
+            logger.info("宝箱已领取并关闭")
+            time.sleep(5)
+        else:
+            logThenExit("未找到领取宝箱继续按钮", "no_continue_chest.png")
+    else:
+        pass
+
+
+# def attackThenRetreat(
+#     kb: pynput.keyboard.Controller,
+#     ms: pynput.mouse.Controller,
+#     window_loc: tuple[int, int, int, int],
+#     ocr: PaddleOCR,
+#     templates: dict[str, np.ndarray],
+#     rank: int
+# ):
+#     left, top, right, bottom = window_loc
+#     mid_pos = ((left + right) // 2, (top + bottom) // 2)
+#     h, w = bottom - top, right - left
+#     while True:
+#         scr = ImageGrab.grab(window_loc)
+#         scr = np.array(scr)[round(h * 5 / 28):round(h * 1 / 4), :round(1 / 7 * w), :]
+#         result = ocr.predict(scr)
+#         if result[0] and result[0]['rec_texts']:
+#             cur_rank = result[0]['rec_texts']
+#             # print(cur_rank)
+#             # 应该只有一个检测结果，就是奖杯数
+#             if len(cur_rank) != 1:
+#                 return
+#             try:
+#                 cur_rank = int(cur_rank[0])
+#                 logger.info(f"当前奖杯：{cur_rank}，目标奖杯：{rank}")
+#                 if cur_rank <= rank:
+#                     return
+#             except Exception as e:
+#                 logger.error(f"奖杯检测失败：{e}")
+#                 return
+#         # 连输5次
+#         for _ in range(5):
+#             while True:
+#                 if not matchOcrThenClick(ms, "进攻", ocr, window_loc, (2 / 3, 1.0, 0.0, 1 / 3)):
+#                     logThenExit("未找到进攻按钮", "no_attack.png")
+#                 if not waitUntilMatchThenClick(ms, templates["search"], window_loc, timeout=2):
+#                     logThenExit("未找到搜索按钮", "no_search.png")
+#                 # 规定时间内未找到对手
+#                 if not matchOpponent(ocr, window_loc):
+#                     logger.warning(f"规定时间内没匹配到，退出重新搜索对手")
+#                     if not matchTemplateThenClick(ms, templates["backhome"], window_loc):
+#                         logThenExit("未找到回营按钮", "no_cancel.png")
+#                     time.sleep(3)
+#                 else:
+#                     logger.info("开始进攻")
+#                     break
+#             zoomOut(kb, ms, mid_pos)
+#             shiftScreen(mid_pos, -2)
+#             arm_pos = (left + 921, top + 745)
+#             # 放龙
+#             dragon = getTemplatePos(window_loc, templates["dragon"])
+#             if dragon:
+#                 moveThenClick(ms, dragon)
+#                 time.sleep(0.5)
+#                 moveThenClick(ms, arm_pos)
+#             if waitUntilMatchThenClick(ms, templates["giveup"], window_loc, timeout=2):
+#                 if waitUntilMatchThenClick(ms, templates["end_fight_confirm"], window_loc, timeout=2):
+#                     if waitUntilMatchThenClick(ms, templates["victory_back"], window_loc, timeout=2):
+#                         logger.info("回营")
+#                         time.sleep(3)
+#                     else:
+#                         logThenExit("未找到回营按钮", "no_backhome.png")
+#                 else:
+#                     logThenExit("未找到确认按钮", "giveup_confirm.png")
+#             else:
+#                 logThenExit("未找到放弃按钮", "no_giveup.png")
 
 
 def main(collect_interval=4, execute_time=3.0, unit="龙", number=4):
@@ -492,19 +508,28 @@ def main(collect_interval=4, execute_time=3.0, unit="龙", number=4):
 if __name__ == "__main__":
     # main()
 
+    def getWindowLocation(title="MuMu模拟器12"):
+        hwnd = win32gui.FindWindow(None, title)
+        if hwnd == 0:
+            raise RuntimeError("游戏没开，或窗口名称错误")
+        else:
+            try:
+                # 发送还原最小化窗口的信息
+                win32gui.SendMessage(hwnd, win32con.WM_SYSCOMMAND, win32con.SC_RESTORE, 0)
+                time.sleep(0.1)
+                # 设为高亮
+                win32gui.SetForegroundWindow(hwnd)
+            finally:
+                left, top, right, bottom = win32gui.GetWindowRect(hwnd)
+                return hwnd, (left, top, right, bottom)
+
     keyboard = pynput.keyboard.Controller()
     mouse = pynput.mouse.Controller()
-    window_loc = getWindowLocation(title="MuMu模拟器12")[1]
+    window_loc = getWindowLocation(title="MuMu安卓设备")[1]
     left, top, right, bottom = window_loc
+    w, h = right - left, bottom - top
     time.sleep(1)
-    template = cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, "dragon.png"))), cv2.COLOR_BGR2RGB)
-    # src = ImageGrab.grab((left, top, right, bottom))
-    # src = np.array(src)
     src = ImageGrab.grab(window_loc)
-    src = np.array(src)
-    src = cv2.cvtColor(cv2.imread("test.png"), cv2.COLOR_BGR2RGB)
-    pos = getTemplatePos((left, top, right, bottom), template, src)
-    if pos:
-        mouse.position = pos
-    else:
-        print("未找到")
+    src = np.array(src)[round(2 / 3 * h):round(1 / 1 * h), round(2 / 3 * w):round(1 / 1 * w), :]
+    plt.imshow(src)
+    plt.show()

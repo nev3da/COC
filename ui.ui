@@ -72,7 +72,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_night">
        <attribute name="title">
@@ -728,61 +728,6 @@
             </widget>
            </item>
            <item>
-            <widget class="QWidget" name="widget_15" native="true">
-             <layout class="QHBoxLayout" name="horizontalLayout_9">
-              <item>
-               <spacer name="horizontalSpacer_18">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="radioButton">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>保持奖杯：</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="rank">
-                <property name="text">
-                 <string>2200</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_13">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
             <widget class="QWidget" name="widget_10" native="true">
              <layout class="QVBoxLayout" name="verticalLayout_6">
               <property name="topMargin">
@@ -1071,7 +1016,7 @@
      <x>0</x>
      <y>0</y>
      <width>619</width>
-     <height>26</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
