@@ -379,7 +379,7 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.label.setText(_translate("MainWindow", "输入窗口名称："))
-        self.window_name_label.setText(_translate("MainWindow", "MuMu模拟器12"))
+        self.window_name_label.setText(_translate("MainWindow", "MuMu安卓设备"))
         self.label_2.setText(_translate("MainWindow", "脚本配置"))
         self.label_7.setText(_translate("MainWindow", "运行时间："))
         self.label_8.setText(_translate("MainWindow", "小时"))

@@ -46,7 +46,7 @@
        <item>
         <widget class="QLineEdit" name="window_name_label">
          <property name="text">
-          <string>MuMu模拟器12</string>
+          <string>MuMu安卓设备</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>

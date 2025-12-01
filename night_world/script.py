@@ -323,7 +323,7 @@ def main(collect_interval=4, execute_time=3.0, unit="龙", number=4):
     ocr = PaddleOCR(use_angle_cls=True, lang="ch", show_log=False)
     keyboard = pynput.keyboard.Controller()
     mouse = pynput.mouse.Controller()
-    window_loc = getWindowLocation(title="MuMu模拟器12")[1]
+    window_loc = getWindowLocation(title="MuMu安卓设备")[1]
     left, top, right, bottom = window_loc
 
     execute_time *= 60 * 60
@@ -355,7 +355,7 @@ if __name__ == "__main__":
 
     keyboard = pynput.keyboard.Controller()
     mouse = pynput.mouse.Controller()
-    window_loc = getWindowLocation(title="MuMu模拟器12")[1]
+    window_loc = getWindowLocation(title="MuMu安卓设备")[1]
     left, top, right, bottom = window_loc
     time.sleep(1)
     template = cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, "dragon.png"))), cv2.COLOR_BGR2RGB)

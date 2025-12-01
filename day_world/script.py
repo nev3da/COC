@@ -508,7 +508,7 @@ def main(collect_interval=4, execute_time=3.0, unit="龙", number=4):
 if __name__ == "__main__":
     # main()
 
-    def getWindowLocation(title="MuMu模拟器12"):
+    def getWindowLocation(title="MuMu安卓设备"):
         hwnd = win32gui.FindWindow(None, title)
         if hwnd == 0:
             raise RuntimeError("游戏没开，或窗口名称错误")

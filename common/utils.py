@@ -35,7 +35,7 @@ def getScaling():
     return scaling
 
 
-def getWindowLocation(title="MuMu模拟器12"):
+def getWindowLocation(title="MuMu安卓设备"):
     hwnd = win32gui.FindWindow(None, title)
     if hwnd == 0:
         logger.error("游戏没开，或窗口名称错误")
