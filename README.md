@@ -1,6 +1,6 @@
 # 部落冲突打资源脚本
 
-需要有python基础
+不了解python可以在右侧release下载main.zip，里面有exe和使用说明<br>
 不支持多显示器
 
 1. pip install -r requirements.txt
