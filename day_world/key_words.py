@@ -35,6 +35,9 @@ TEMPLATES = {
     'receive_chest': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'receive_chest.png'))), cv2.COLOR_BGR2RGB),
     'chest_hammer': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'chest_hammer.png'))), cv2.COLOR_BGR2RGB),
     'continue_chest': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'continue_chest.png'))), cv2.COLOR_BGR2RGB),
+    'castle_cake': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'castle_cake.png'))), cv2.COLOR_BGR2RGB),
+    'castle_confirm': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'castle_confirm.png'))), cv2.COLOR_BGR2RGB),
+    'castle_cancel': cv2.cvtColor(cv2.imread(resource_path(os.path.join(CONTROL_DIR, 'castle_cancel.png'))), cv2.COLOR_BGR2RGB),
 
     'archer_queen': cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, 'archer_queen.png'))), cv2.COLOR_BGR2RGB),
     'bbrking': cv2.cvtColor(cv2.imread(resource_path(os.path.join(ARM_DIR, 'bbrking.png'))), cv2.COLOR_BGR2RGB),

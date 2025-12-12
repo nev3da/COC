@@ -177,6 +177,25 @@ def detectOpponentResources(
     return True
 
 
+def check_castle_cake(
+    ms: pynput.mouse.Controller,
+    window_loc: tuple[int, int, int, int],
+    templates: dict[str, np.ndarray]
+):
+    if waitUntilMatchThenClick(ms, templates["castle_cake"], window_loc, timeout=2, crop=(0.5, 1, 2 / 3, 1)):
+        if waitUntilMatchThenClick(ms, templates["castle_confirm"], window_loc, timeout=2):
+            time.sleep(1)
+            # 可能没有设置援军
+            if matchTemplateThenClick(ms, templates["castle_cancel"], window_loc):
+                logger.warning("未设置援军")
+            else:
+                logger.info("设置援军成功")
+        else:
+            logThenExit("未找到援军确认按钮", "no_castle_confirm.png")
+    else:
+        pass
+
+
 def attack(
     kb: pynput.keyboard.Controller,
     ms: pynput.mouse.Controller,
@@ -197,6 +216,8 @@ def attack(
             logThenExit("未找到进攻按钮", "no_attack.png")
         if not waitUntilMatchThenClick(ms, templates["search"], window_loc, timeout=2, crop=(0, 1, 0, 1 / 3)):
             logThenExit("未找到搜索按钮", "no_search.png")
+        # 如果吃了部落城堡免费增援的蛋糕
+        check_castle_cake(ms, window_loc, templates)
         if not waitUntilMatchThenClick(ms, templates["attack"], window_loc, timeout=2, crop=(2 / 3, 1, 2 / 3, 1)):
             logThenExit("未找到进攻按钮", "no_attack.png")
         # 找到对手
@@ -281,15 +302,15 @@ def attack(
         moveThenClick(ms, royal_champion)
         time.sleep(0.5)
         moveThenClick(ms, bbrking_pos)
-    # 放蝙蝠法术
-    bats_pos = generate_gaussian_points(*queen_pos, *bbrking_pos, *warden_pos, num_points=11)
+    # 放蝙蝠法术（14 = 11 + 3部落城堡）
+    bats_pos = generate_gaussian_points(*queen_pos, *bbrking_pos, *warden_pos, num_points=14)
     bat = getTemplatePos(window_loc, templates["bat"])
     if bat:
         moveThenClick(ms, bat)
         time.sleep(0.5)
         for pos in bats_pos:
             moveThenClick(ms, pos)
-            time.sleep(0.1)
+            time.sleep(0.2)
     # 放飞艇
     if siege_weapon:
         airship = getTemplatePos(window_loc, templates["airship"])
@@ -383,11 +404,15 @@ def receive_chest(
     window_loc: tuple[int, int, int, int],
     templates: dict[str, np.ndarray]
 ):
+    left, top, right, bottom = window_loc
+    mid_pos = ((left + right) // 2, (top + bottom) // 2)
     if matchTemplateThenClick(ms, templates["chest_hammer"], window_loc):
-        time.sleep(0.5)
+        time.sleep(0.2)
         for _ in range(3):
             ms.click(pynput.mouse.Button.left)
             time.sleep(0.5)
+        ms.position = mid_pos
+        time.sleep(1)
         if waitUntilMatchThenClick(ms, templates["continue_chest"], window_loc, timeout=5):
             logger.info("宝箱已领取并关闭")
             time.sleep(5)

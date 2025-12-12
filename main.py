@@ -201,8 +201,8 @@ class DayThread(QThread):
             window_loc = getWindowLocation(self.window_name)[1]
             start_time = time.time()
             battle_num = 1
-            # 练兵
-            day_script.buildArmy(mouse, window_loc, day_keywords.TEMPLATES, self.number)
+            # # 练兵
+            # day_script.buildArmy(mouse, window_loc, day_keywords.TEMPLATES, self.number)
             while True:
                 if event.is_set():
                     logger.success("已手动停止")
@@ -212,7 +212,7 @@ class DayThread(QThread):
                 # 进攻
                 day_script.attack(keyboard, mouse, window_loc, ocr, day_keywords.TEMPLATES, self.number, (self.gold, self.elixir, self.oil), self.e)
                 time.sleep(5)
-                # 检查是否弹出宝箱（战场寻宝））
+                # 检查是否弹出宝箱（战场寻宝）
                 day_script.receive_chest(mouse, window_loc, day_keywords.TEMPLATES)
                 # 检查是否弹出胜利之星奖励
                 logger.info("检查胜利之星")
