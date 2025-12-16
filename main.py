@@ -201,8 +201,8 @@ class DayThread(QThread):
             window_loc = getWindowLocation(self.window_name)[1]
             start_time = time.time()
             battle_num = 1
-            # # 练兵
-            # day_script.buildArmy(mouse, window_loc, day_keywords.TEMPLATES, self.number)
+            # 练兵
+            day_script.buildArmy(mouse, window_loc, day_keywords.TEMPLATES, self.number)
             while True:
                 if event.is_set():
                     logger.success("已手动停止")
