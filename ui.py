@@ -234,7 +234,7 @@ class Ui_MainWindow(object):
         self.day_execute_time.setMinimumSize(QtCore.QSize(100, 0))
         self.day_execute_time.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.day_execute_time.setAlignment(QtCore.Qt.AlignCenter)
-        self.day_execute_time.setMaximum(180)
+        self.day_execute_time.setMaximum(1440)
         self.day_execute_time.setSingleStep(10)
         self.day_execute_time.setProperty("value", 30)
         self.day_execute_time.setObjectName("day_execute_time")
@@ -372,7 +372,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
