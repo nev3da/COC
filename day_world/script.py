@@ -146,21 +146,21 @@ def detectOpponentResources(
     idx = -math.inf
     result = ocr.predict(scr)
     try:
+        op_gold, op_elixir, op_oil = 0, 0, 0
         for line in result[0]['rec_texts']:
-            # print(line)
             idx += 1
             if idx == 1:
-                op_gold = int(line.replace(' ', '').replace('.', '').replace(',', ''))
+                op_gold = int(''.join(c for c in line if c.isdigit()))
                 if gold > op_gold:
                     logger.info(f"对手金币不足：{formatInt(op_gold)} < {formatInt(gold)}")
                     return False
             elif idx == 2:
-                op_elixir = int(line.replace(' ', '').replace('.', '').replace(',', ''))
+                op_elixir = int(''.join(c for c in line if c.isdigit()))
                 if elixir > op_elixir:
                     logger.info(f"对手圣水不足：{formatInt(op_elixir)} < {formatInt(elixir)}")
                     return False
             elif idx == 3:
-                op_oil = int(line.replace(' ', '').replace('.', '').replace(',', ''))
+                op_oil = int(''.join(c for c in line if c.isdigit()))
                 if oil > op_oil:
                     logger.info(f"对手黑油不足：{formatInt(op_oil)} < {formatInt(oil)}")
                     return False
@@ -352,7 +352,7 @@ def attack(
             try:
                 rate = int(destruction_rate)
                 if rate > 97:
-                    limit_time = 10
+                    limit_time = 20
             except ValueError:
                 pass
             if time.time() - destruction_time > limit_time:
@@ -372,14 +372,7 @@ def attack(
                     else:
                         logThenExit("未找到结束战斗确认按钮", "no_end_fight_confirm.png")
                 else:
-                    # 可能刚到5或10秒时，战斗恰好结束了
-                    if waitUntilMatchThenClick(ms, templates["victory_back"], window_loc, timeout=2) or waitUntilMatchThenClick(ms, templates["receive_chest"], window_loc, timeout=2):
-                        pbar.close()
-                        logger.info("战斗结束，回营")
-                        ms.position = mid_pos
-                        return
-                    else:
-                        logThenExit("未找到放弃/结束战斗按钮", "no_end_fight.png")
+                    logThenExit("未找到放弃/结束战斗按钮", "no_end_fight.png")
             if matchTemplateThenClick(ms, templates["victory_back"], window_loc) or matchTemplateThenClick(ms, templates["receive_chest"], window_loc):
                 pbar.close()
                 logger.info("战斗结束，回营")
