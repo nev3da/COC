@@ -60,6 +60,8 @@ class ScreenShotThread(Thread):
 
     def imagesToVideo(self):
         frames = list(self.frames)
+        if not frames:
+            return
         height, width, _ = frames[0][1].shape
         timestamps = [t for t, _ in frames]
         total_time = timestamps[-1] - timestamps[0]
@@ -288,6 +290,7 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
             self.hwnd_operate,
             self.ocr,
             self.cap_script,
+            event,
             int(self.collect_interval_1.text()),
             int(self.collect_interval_2.text()),
             float(self.night_execute_time.text()),
