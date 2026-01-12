@@ -185,6 +185,8 @@ class DayThread(QThread):
                 battle_num += 1
                 # 进攻
                 day_script.attack(self.hwnd, self.cap, self.ocr, self.number, (self.gold, self.elixir, self.oil), self.e)
+                if self.e.is_set():
+                    break
                 time.sleep(4)
                 # 检查是否弹出宝箱（战场寻宝）
                 day_script.receiveChest(self.hwnd, self.cap)

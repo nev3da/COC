@@ -94,7 +94,7 @@ def matchOpponent(
         if time.time() - start_time >= time_limit:
             return False
         logger.info(f"正在匹配对手：[{time.time() - start_time:.2f}/{time_limit:.2f}]")
-        if getOcrPos(hwnd, cap, ocr, "下一个", crop=(2 / 3, 1.0, 2 / 3, 1.0)):
+        if getTemplatePos(hwnd, cap, TEMPLATES['next'], crop=(1 / 2, 1.0, 2 / 3, 1.0)):
             return True
         time.sleep(1)
 
@@ -299,14 +299,14 @@ def attack(
     time.sleep(0.5)
 
     with tqdm(total=BATTLE_TIME, unit="秒") as pbar:
-        if event and event.is_set():
-            pbar.close()
-            return
         start_time = time.time()
         last_time = time.time()
         destruction_time = time.time()
         destruction_rate = 0
         while True:
+            if event and event.is_set():
+                pbar.close()
+                return
             # 摧毁率超过5秒没有变化
             limit_time = 5
             try:
