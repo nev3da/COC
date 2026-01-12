@@ -324,8 +324,6 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
         self.screenshot_thread.start()
 
     def finished(self):
-        self.cap_script.release()
-        self.cap_record.release()
         # 停止脚本线程
         if self.script_thread:
             self.script_thread.quit()
@@ -349,6 +347,9 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
         self.script_thread = None
         self.screenshot_thread = None
         self.saveConfig()
+
+        self.cap_script.release()
+        self.cap_record.release()
 
     def saveConfig(self):
         config = {
