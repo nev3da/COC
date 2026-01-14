@@ -249,6 +249,7 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
             text_recognition_model_name="PP-OCRv5_mobile_rec",
             text_detection_model_dir=resourcePath("common/paddlemodels/PP-OCRv5_mobile_det_infer"),
             text_recognition_model_dir=resourcePath("common/paddlemodels/PP-OCRv5_mobile_rec_infer"),
+            enable_mkldnn=False,    # 防止多线程时交替产生Unknown Exception
         )
         self.hwnd_prtsc = win32gui.FindWindow(None, self.window_name_label.text())
         self.hwnd_operate = win32gui.FindWindowEx(self.hwnd_prtsc, None, None, None)
