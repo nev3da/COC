@@ -241,7 +241,7 @@ def attack(
         time.sleep(0.5)
         for pos in dragons_pos:
             click(hwnd, pos)
-            time.sleep(0.05)
+            time.sleep(0.1)
     # 放大守护者
     grand_warden = getTemplatePos(hwnd, cap, TEMPLATES["grand_warden"])
     if grand_warden:
@@ -268,7 +268,7 @@ def attack(
         time.sleep(0.5)
         for pos in bats_pos:
             click(hwnd, pos)
-            time.sleep(0.05)
+            time.sleep(0.1)
     # 放飞艇
     if siege_weapon:
         airship = getTemplatePos(hwnd, cap, TEMPLATES["airship"])
