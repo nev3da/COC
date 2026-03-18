@@ -20,8 +20,6 @@ def buildArmy(
         logThenExit("未找到建造按钮", "no_build_army.png")
     time.sleep(1)
     # 删除所有部队
-    if not getTemplatePos(hwnd, cap, TEMPLATES["delete"]):
-        logThenExit("未找到删除部队按钮", "no_delete_army.png")
     click(hwnd, (1543, 208))
     waitUntilMatchThenClick(hwnd, cap, TEMPLATES["delete_confirm"], timeout=3)
     time.sleep(1)
@@ -39,8 +37,6 @@ def buildArmy(
     click(hwnd, (1000, 300))
     time.sleep(1)
     # 删除所有法术
-    if not getTemplatePos(hwnd, cap, TEMPLATES["delete"]):
-        logThenExit("未找到删除法术按钮", "no_delete_spell.png")
     click(hwnd, (1222, 430))
     waitUntilMatchThenClick(hwnd, cap, TEMPLATES["delete_confirm"], timeout=3)
     time.sleep(1)
@@ -58,8 +54,6 @@ def buildArmy(
     click(hwnd, (1000, 300))
     time.sleep(1)
     # 删除所有攻城武器
-    if not getTemplatePos(hwnd, cap, TEMPLATES["delete"]):
-        logThenExit("未找到删除攻城武器按钮", "no_delete_siege_weapons.png")
     click(hwnd, (1543, 430))
     waitUntilMatchThenClick(hwnd, cap, TEMPLATES["delete_confirm"], timeout=3)
     time.sleep(1)
@@ -67,11 +61,12 @@ def buildArmy(
     click(hwnd, (1427, 520))
     time.sleep(1)
     build_airship_pos = getTemplatePos(hwnd, cap, TEMPLATES["build_airship"])
-    if not build_airship_pos:
-        logThenExit("未找到建造攻城气球按钮", "no_build_airship.png")
-    for _ in range(3):
-        click(hwnd, build_airship_pos)
-        time.sleep(0.1)
+    if build_airship_pos:
+        for _ in range(3):
+            click(hwnd, build_airship_pos)
+            time.sleep(0.1)
+    else:
+        logThenExit("未找到建造攻城气球按钮", "no_build_airship.png", quit=False)
     time.sleep(1)
     # 返回
     click(hwnd, (1000, 300))
@@ -85,7 +80,6 @@ def buildArmy(
 def matchOpponent(
     hwnd: int,
     cap: WindowCapture,
-    ocr: PaddleOCR,
     time_limit: float = 20.0
 ):
     time.sleep(1)
@@ -180,7 +174,7 @@ def attack(
         if not waitUntilMatchThenClick(hwnd, cap, TEMPLATES["attack"], timeout=2, crop=(2 / 3, 1, 2 / 3, 1)):
             logThenExit("未找到进攻按钮", "no_attack.png")
         # 找到对手
-        while matchOpponent(hwnd, cap, ocr):
+        while matchOpponent(hwnd, cap):
             if event and event.is_set():
                 return
             # 检测对手资源
@@ -233,6 +227,12 @@ def attack(
         click(hwnd, bbrking)
         time.sleep(0.5)
         click(hwnd, bbrking_pos)
+    # 放飞龙公爵
+    dragon_duke = getTemplatePos(hwnd, cap, TEMPLATES["dragon_duke"])
+    if dragon_duke:
+        click(hwnd, dragon_duke)
+        time.sleep(0.5)
+        click(hwnd, bbrking_pos)
     # 放龙
     dragons_pos = generateGaussianPoints(*queen_pos, *bbrking_pos, num_points=number)
     dragon = getTemplatePos(hwnd, cap, TEMPLATES["dragon"])
@@ -260,6 +260,13 @@ def attack(
         click(hwnd, royal_champion)
         time.sleep(0.5)
         click(hwnd, bbrking_pos)
+    # 放飞艇
+    if siege_weapon:
+        airship = getTemplatePos(hwnd, cap, TEMPLATES["airship"])
+        if airship:
+            click(hwnd, airship)
+            time.sleep(0.5)
+            click(hwnd, warden_pos)
     # 放蝙蝠法术（14 = 11 + 3部落城堡）
     bats_pos = generateGaussianPoints(*queen_pos, *bbrking_pos, num_points=14)
     bat = getTemplatePos(hwnd, cap, TEMPLATES["bat"])
@@ -269,13 +276,7 @@ def attack(
         for pos in bats_pos:
             click(hwnd, pos)
             time.sleep(0.1)
-    # 放飞艇
-    if siege_weapon:
-        airship = getTemplatePos(hwnd, cap, TEMPLATES["airship"])
-        if airship:
-            click(hwnd, airship)
-            time.sleep(0.5)
-            click(hwnd, warden_pos)
+
     # 等待几秒
     time.sleep(5)
     # 大守护者放技能（金身）
@@ -285,7 +286,6 @@ def attack(
     # 飞盾战神放技能（火箭长矛）
     if royal_champion:
         click(hwnd, royal_champion)
-    time.sleep(0.5)
     # 再等待几秒
     time.sleep(3)
     # 蛮王放技能（足球）
@@ -296,7 +296,11 @@ def attack(
     # 亡灵王子放技能（减速法球）
     if minion_prince:
         click(hwnd, minion_prince)
-    time.sleep(0.5)
+    # 再等待几秒
+    time.sleep(2)
+    # 飞龙公爵放技能
+    if dragon_duke:
+        click(hwnd, dragon_duke)
 
     with tqdm(total=BATTLE_TIME, unit="秒") as pbar:
         start_time = time.time()

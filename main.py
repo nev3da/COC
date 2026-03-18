@@ -127,6 +127,10 @@ class NightThread(QThread):
                     # 检查是否弹出胜利之星奖励
                     logger.info("检查胜利之星")
                     matchTemplateThenClick(self.hwnd, self.cap, night_keywords.TEMPLATES["victory_star"])
+                    elapsed_time = time.time() - start_time
+                    hours, remainder = divmod(elapsed_time, 3600)
+                    minutes, seconds = divmod(remainder, 60)
+                    logger.info(f"已执行时间：[{int(hours)}h{int(minutes)}min{int(seconds)}s/{int(self.execute_time / 3600)}h]")
                 if self.e.is_set():
                         break
                 # 收集圣水
@@ -135,11 +139,6 @@ class NightThread(QThread):
                 if time.time() - start_time >= self.execute_time:
                     logger.success("已到达执行时间")
                     break
-                else:
-                    elapsed_time = time.time() - start_time
-                    hours, remainder = divmod(elapsed_time, 3600)
-                    minutes, seconds = divmod(remainder, 60)
-                    logger.info(f"已执行时间：[{int(hours)}h{int(minutes)}min{int(seconds)}s/{int(self.execute_time / 3600)}h]")
         except Exception as e:
             print(e)
         finally:

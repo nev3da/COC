@@ -14,11 +14,8 @@ CONTROL_DIR = f'{DIR}/control_imgs'
 
 TEMPLATES = {
     'build_army': cv2.cvtColor(cv2.imread(resourcePath(os.path.join(CONTROL_DIR, 'build_army.png'))), cv2.COLOR_BGR2RGB),
-    'delete': cv2.cvtColor(cv2.imread(resourcePath(os.path.join(CONTROL_DIR, 'delete.png'))), cv2.COLOR_BGR2RGB),
     'delete_confirm': cv2.cvtColor(cv2.imread(resourcePath(os.path.join(CONTROL_DIR, 'delete_confirm.png'))), cv2.COLOR_BGR2RGB),
     'build_dragon': cv2.cvtColor(cv2.imread(resourcePath(os.path.join(CONTROL_DIR, 'build_dragon.png'))), cv2.COLOR_BGR2RGB),
-    'build_rage': cv2.cvtColor(cv2.imread(resourcePath(os.path.join(CONTROL_DIR, 'build_rage.png'))), cv2.COLOR_BGR2RGB),
-    'build_lightning': cv2.cvtColor(cv2.imread(resourcePath(os.path.join(CONTROL_DIR, 'build_lightning.png'))), cv2.COLOR_BGR2RGB),
     'build_bat': cv2.cvtColor(cv2.imread(resourcePath(os.path.join(CONTROL_DIR, 'build_bat.png'))), cv2.COLOR_BGR2RGB),
     'build_airship': cv2.cvtColor(cv2.imread(resourcePath(os.path.join(CONTROL_DIR, 'build_airship.png'))), cv2.COLOR_BGR2RGB),
     'build_end': cv2.cvtColor(cv2.imread(resourcePath(os.path.join(CONTROL_DIR, 'build_end.png'))), cv2.COLOR_BGR2RGB),
@@ -44,6 +41,7 @@ TEMPLATES = {
     'grand_warden': cv2.cvtColor(cv2.imread(resourcePath(os.path.join(ARM_DIR, 'grand_warden.png'))), cv2.COLOR_BGR2RGB),
     'royal_champion': cv2.cvtColor(cv2.imread(resourcePath(os.path.join(ARM_DIR, 'royal_champion.png'))), cv2.COLOR_BGR2RGB),
     'minion_prince': cv2.cvtColor(cv2.imread(resourcePath(os.path.join(ARM_DIR, 'minion_prince.png'))), cv2.COLOR_BGR2RGB),
+    'dragon_duke': cv2.cvtColor(cv2.imread(resourcePath(os.path.join(ARM_DIR, 'dragon_duke.png'))), cv2.COLOR_BGR2RGB),
     'dragon': cv2.cvtColor(cv2.imread(resourcePath(os.path.join(ARM_DIR, 'dragon.png'))), cv2.COLOR_BGR2RGB),
     'lightning': cv2.cvtColor(cv2.imread(resourcePath(os.path.join(ARM_DIR, 'lightning.png'))), cv2.COLOR_BGR2RGB),
     'rage': cv2.cvtColor(cv2.imread(resourcePath(os.path.join(ARM_DIR, 'rage.png'))), cv2.COLOR_BGR2RGB),
