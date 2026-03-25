@@ -17,7 +17,7 @@ def buildArmy(
     number: int = 16
 ):
     if not matchTemplateThenClick(hwnd, cap, TEMPLATES["build_army"]):
-        logThenExit("未找到建造按钮", "no_build_army.png")
+        logThenExit("未找到建造按钮")
     time.sleep(1)
     # 删除所有部队
     click(hwnd, (1543, 208))
@@ -28,7 +28,7 @@ def buildArmy(
     time.sleep(1)
     build_dragon_pos = getTemplatePos(hwnd, cap, TEMPLATES["build_dragon"])
     if not build_dragon_pos:
-        logThenExit("未找到建造龙按钮", "no_build_dragon.png")
+        logThenExit("未找到建造龙按钮")
     for _ in range(number):
         click(hwnd, build_dragon_pos)
         time.sleep(0.1)
@@ -45,7 +45,7 @@ def buildArmy(
     time.sleep(1)
     build_bat_pos = getTemplatePos(hwnd, cap, TEMPLATES["build_bat"])
     if not build_bat_pos:
-        logThenExit("未找到建造蝙蝠法术按钮", "no_build_bat.png")
+        logThenExit("未找到建造蝙蝠法术按钮")
     for _ in range(11):
         click(hwnd, build_bat_pos)
         time.sleep(0.1)
@@ -66,14 +66,14 @@ def buildArmy(
             click(hwnd, build_airship_pos)
             time.sleep(0.1)
     else:
-        logThenExit("未找到建造攻城气球按钮", "no_build_airship.png", quit=False)
+        logThenExit("未找到建造攻城气球按钮", quit=False)
     time.sleep(1)
     # 返回
     click(hwnd, (1000, 300))
     time.sleep(1)
     # 结束建造
     if not waitUntilMatchThenClick(hwnd, cap, TEMPLATES["build_end"], timeout=3):
-        logThenExit("未找到结束建造按钮", "no_build_end.png")
+        logThenExit("未找到结束建造按钮")
     time.sleep(1)
 
 
@@ -149,7 +149,7 @@ def checkCastleCake(
             else:
                 logger.info("设置援军成功")
         else:
-            logThenExit("未找到援军确认按钮", "no_castle_confirm.png")
+            logThenExit("未找到援军确认按钮")
 
 
 def attack(
@@ -166,13 +166,13 @@ def attack(
     while True:
         find = False
         if not matchOcrThenClick(hwnd, cap, ocr, "进攻", (2 / 3, 1, 0, 1 / 3)):
-            logThenExit("未找到进攻按钮", "no_attack.png")
+            logThenExit("未找到进攻按钮", match_fail=False)
         if not waitUntilMatchThenClick(hwnd, cap, TEMPLATES["search"], timeout=2, crop=(0, 1, 0, 1 / 3)):
-            logThenExit("未找到搜索按钮", "no_search.png")
+            logThenExit("未找到搜索按钮")
         # 如果吃了部落城堡免费增援的蛋糕
         checkCastleCake(hwnd, cap)
         if not waitUntilMatchThenClick(hwnd, cap, TEMPLATES["attack"], timeout=2, crop=(2 / 3, 1, 2 / 3, 1)):
-            logThenExit("未找到进攻按钮", "no_attack.png")
+            logThenExit("未找到进攻按钮")
         # 找到对手
         while matchOpponent(hwnd, cap):
             if event and event.is_set():
@@ -185,12 +185,12 @@ def attack(
             else:
                 logger.info('搜索下一个对手')
                 if not matchTemplateThenClick(hwnd, cap, TEMPLATES["next"]):
-                    logThenExit("未找到搜索下一个对手按钮", "no_next.png")
+                    logThenExit("未找到搜索下一个对手按钮")
         # 规定时间内未找到对手
         if not find:
             logger.warning(f"规定时间内没匹配到，退出重新搜索对手")
             if not matchTemplateThenClick(hwnd, cap, TEMPLATES["backhome"]):
-                logThenExit("未找到回营按钮", "no_cancel.png")
+                logThenExit("未找到回营按钮")
             time.sleep(3)
         else:
             logger.info("开始进攻")
@@ -206,11 +206,11 @@ def attack(
     if not getTemplatePos(hwnd, cap, TEMPLATES["airship"]):
         if matchTemplateThenClick(hwnd, cap, TEMPLATES["switch"]):
             if not waitUntilMatchThenClick(hwnd, cap, TEMPLATES["switch_airship"], timeout=3):
-                logger.warning("未找到攻城气球")
+                logThenExit("切换时未找到攻城气球", quit=False)
                 siege_weapon = False
                 click(hwnd, mid_pos)
         else:
-            logger.warning("未找到切换按钮，无法切换到攻城气球")
+            logThenExit("未找到切换按钮，无法切换到攻城气球", quit=False)
             siege_weapon = False
     # 放女王
     queen = getTemplatePos(hwnd, cap, TEMPLATES["archer_queen"])
@@ -240,6 +240,18 @@ def attack(
         click(hwnd, dragon)
         time.sleep(0.5)
         for pos in dragons_pos:
+            click(hwnd, pos)
+            time.sleep(0.1)
+    # 放自定义兵种
+    for (arm_name, count) in CUSTOM_TROOPS:
+        arm_pos = generateGaussianPoints(*queen_pos, *bbrking_pos, num_points=count)
+        arm = getTemplatePos(hwnd, cap, TEMPLATES[arm_name])
+        if not arm:
+            logThenExit(f"未识别到自定义兵种：{arm_name}", quit=False)
+            continue
+        click(hwnd, arm)
+        time.sleep(0.5)
+        for pos in arm_pos:
             click(hwnd, pos)
             time.sleep(0.1)
     # 放大守护者
@@ -307,11 +319,11 @@ def attack(
         last_time = time.time()
         destruction_time = time.time()
         destruction_rate = 0
+        fail_msg = None
         while True:
             if event and event.is_set():
                 pbar.close()
                 return
-            # 摧毁率超过5秒没有变化
             limit_time = 5
             try:
                 rate = int(destruction_rate)
@@ -319,27 +331,22 @@ def attack(
                     limit_time = 20
             except ValueError:
                 pass
+            # 如果摧毁率超过limit_time秒没有变化，结束战斗
             if time.time() - destruction_time > limit_time:
-                end = matchTemplateThenClick(hwnd, cap, TEMPLATES["giveup"])
-                if not end:
-                    end = matchTemplateThenClick(hwnd, cap, TEMPLATES["end_fight"])
-                if end:
-                    if waitUntilMatchThenClick(hwnd, cap, TEMPLATES["end_fight_confirm"], timeout=3):
-                        # 考虑战场寻宝活动
-                        if waitUntilMatchThenClick(hwnd, cap, TEMPLATES["victory_back"], timeout=3) or waitUntilMatchThenClick(hwnd, cap, TEMPLATES["receive_chest"], timeout=3):
-                            pbar.close()
-                            logger.info("摧毁率超过5秒没有变化，结束战斗")
-                            return
-                        else:
-                            logThenExit("未找到回营按钮")
-                    else:
-                        logThenExit("未找到结束战斗确认按钮", "no_end_fight_confirm.png")
+                if matchTemplateThenClick(hwnd, cap, TEMPLATES["giveup"]) or matchTemplateThenClick(hwnd, cap, TEMPLATES["end_fight"]):
+                    if not waitUntilMatchThenClick(hwnd, cap, TEMPLATES["end_fight_confirm"], timeout=1):
+                        fail_msg = last_match_fail.get()
                 else:
-                    logThenExit("未找到放弃/结束战斗按钮", "no_end_fight.png")
+                    fail_msg = last_match_fail.get()
+            time.sleep(1)
+            # 屏幕上出现了回营的按钮，可能是战斗自动结束，也可能是上述代码点击了“放弃战斗/结束战斗”，并确认后才出现的
             if matchTemplateThenClick(hwnd, cap, TEMPLATES["victory_back"]) or matchTemplateThenClick(hwnd, cap, TEMPLATES["receive_chest"]):
                 pbar.close()
                 logger.info("战斗结束，回营")
                 return
+            else:
+                if fail_msg:
+                    logThenExit(f"未找到相应按钮", fail_msg=fail_msg)
             scr_shot = cap.grab()[round(h * 1 / 2):, round(w * 2 / 3):, :]
             result = ocr.predict(scr_shot)
             if result[0] and result[0]['rec_texts']:
@@ -347,7 +354,6 @@ def attack(
                     if '%' in text and destruction_rate != text.split('%')[0]:
                         destruction_rate = text.split('%')[0]
                         destruction_time = time.time()
-            time.sleep(1)
             pbar.update(round(time.time() - last_time, 1))
             last_time = time.time()
             pbar.set_description(f"进攻中：{(time.time() - start_time):.1f}/{BATTLE_TIME}秒， 当前摧毁率：{destruction_rate}%")
@@ -367,7 +373,7 @@ def receiveChest(
             logger.info("宝箱已领取并关闭")
             time.sleep(5)
         else:
-            logThenExit("未找到领取宝箱继续按钮", "no_continue_chest.png")
+            logThenExit("未找到领取宝箱继续按钮")
 
 
 if __name__ == "__main__":

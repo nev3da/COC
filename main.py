@@ -17,6 +17,7 @@ import cv2
 from paddleocr import PaddleOCR
 import time
 import sys
+import importlib
 
 from common.utils import *
 from day_world import key_words as day_keywords
@@ -132,7 +133,7 @@ class NightThread(QThread):
                     minutes, seconds = divmod(remainder, 60)
                     logger.info(f"已执行时间：[{int(hours)}h{int(minutes)}min{int(seconds)}s/{int(self.execute_time / 3600)}h]")
                 if self.e.is_set():
-                        break
+                    break
                 # 收集圣水
                 night_script.collectElixir(self.hwnd, self.cap)
                 # 判断是否到达执行时间
@@ -140,7 +141,7 @@ class NightThread(QThread):
                     logger.success("已到达执行时间")
                     break
         except Exception as e:
-            print(e)
+            logger.exception(e)
         finally:
             self.finish_sig.emit()
 
@@ -203,13 +204,14 @@ class DayThread(QThread):
                     minutes, seconds = divmod(elapsed_time, 60)
                     logger.info(f"已执行时间：[{int(minutes)}min{int(seconds)}s/{int(self.execute_time / 60)}min]")
         except Exception as e:
-            print(e)
+            logger.exception(e)
         finally:
             self.finish_sig.emit()
 
 
 class MainUi(QMainWindow, ui.Ui_MainWindow):
     def __init__(self):
+        self.event = threading.Event()
         super(MainUi, self).__init__()
         self.script_thread: QThread = None
         self.screenshot_thread: ScreenShotThread = None
@@ -232,11 +234,11 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
             self.day_number.setText(config.get("day_number", ""))
             self.gold.setText(formatInt(config.get("gold", "")))
             self.elixir.setText(formatInt(config.get("elixir", "")))
-            self.oil.setText(formatInt(config.get("oil", ""))),
+            self.oil.setText(formatInt(config.get("oil", "")))
         except FileNotFoundError:
             logger.warning("配置文件不存在，使用默认设置")
         except Exception as e:
-            logger.error("加载配置出错:", e)
+            logger.exception(f"加载配置出错: {e}")
 
     def initResources(self):
         print("加载模型中...")
@@ -259,40 +261,57 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
     def setLogics(self):
         def nightScriptEvent():
             if self.night_btn.text() == "开始":
-                event.clear()
+                self.event.clear()
                 self.night_btn.setText("停止")
                 self.tabWidget.tabBar().setEnabled(False)
+                self.reload_btn.setEnabled(False)
                 self.cap_script.initResources()
                 self.nightBegin()
                 self.screenShotBegin()
             else:
-                event.set()
+                self.event.set()
                 self.night_btn.setText("等待结束")
                 self.night_btn.setEnabled(False)
 
         def dayScriptEvent():
             if self.day_btn.text() == "开始":
-                event.clear()
+                self.event.clear()
                 self.day_btn.setText("停止")
                 self.tabWidget.tabBar().setEnabled(False)
+                self.reload_btn.setEnabled(False)
                 self.cap_script.initResources()
                 self.dayBegin()
                 self.screenShotBegin()
             else:
-                event.set()
+                self.event.set()
                 self.day_btn.setText("等待结束")
                 self.day_btn.setEnabled(False)
 
         self.night_btn.clicked.connect(nightScriptEvent)
         self.day_btn.clicked.connect(dayScriptEvent)
+        self.reload_btn.clicked.connect(self.reloadTemplates)
         self.setWindowIcon(QIcon(resourcePath("avatar.ico")))
+
+    def reloadTemplates(self):
+        # 重新从磁盘加载所有模板图片（含自定义兵种），无需重启程序。
+        try:
+            logger.info("正在重载图片...")
+            importlib.reload(day_keywords)
+            importlib.reload(night_keywords)
+            # 让 day/night_script 的全局引用同步更新
+            day_script.TEMPLATES = day_keywords.TEMPLATES
+            day_script.CUSTOM_TROOPS = day_keywords.CUSTOM_TROOPS
+            night_script.TEMPLATES = night_keywords.TEMPLATES
+            logger.success("图片重载成功")
+        except Exception as e:
+            logger.exception(f"图片重载失败：{e}")
 
     def nightBegin(self):
         self.script_thread = NightThread(
             self.hwnd_operate,
             self.ocr,
             self.cap_script,
-            event,
+            self.event,
             int(self.collect_interval_1.text()),
             int(self.collect_interval_2.text()),
             float(self.night_execute_time.text()),
@@ -312,7 +331,7 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
             int(self.gold.text().replace(' ', '')),
             int(self.elixir.text().replace(' ', '')),
             int(self.oil.text().replace(' ', '')),
-            event
+            self.event
         )
         self.script_thread.finish_sig.connect(self.finished)
         self.script_thread.start()
@@ -344,6 +363,7 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
         self.day_btn.setText("开始")
         self.day_btn.setEnabled(True)
         self.tabWidget.tabBar().setEnabled(True)
+        self.reload_btn.setEnabled(True)
         self.script_thread = None
         self.screenshot_thread = None
         self.saveConfig()
@@ -357,7 +377,7 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
             "night_execute_time": self.night_execute_time.value(),
             "collect_interval_1": self.collect_interval_1.text(),
             "collect_interval_2": self.collect_interval_2.text(),
-            "unit": self.unit.currentIndex(),  # 或 self.unit.currentText()
+            "unit": self.unit.currentIndex(),
             "night_number": self.night_number.value(),
             "day_execute_time": self.day_execute_time.value(),
             "day_number": self.day_number.text(),
@@ -370,12 +390,11 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
 
 
 if __name__ == "__main__":
-    event = threading.Event()
     app = QApplication(sys.argv)
     try:
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("cocscript")
     except Exception as e:
-        logger.error(e)
+        logger.exception(e)
     with open(resourcePath("style.qss"), "r", encoding="utf-8") as file:
         app.setStyleSheet(file.read())
     window = MainUi()

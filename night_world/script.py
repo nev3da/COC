@@ -24,25 +24,23 @@ def collectElixir(
     logger.info("识别圣水车")
     while True:
         scr_shot = cap.grab()
-        # 识别白色背景圣水
-        wheelbarrow_pos = getTemplatePos(hwnd, cap, TEMPLATES["elixir1"], scr_shot, threshold=0.8)
+        # 识别白色/红色背景圣水
+        wheelbarrow_pos = getTemplatePos(hwnd, cap, TEMPLATES["elixir1"], scr_shot, threshold=0.8) or getTemplatePos(hwnd, cap, TEMPLATES["elixir2"], scr_shot, threshold=0.8)
         if not wheelbarrow_pos:
-            # 识别红色背景圣水
-            wheelbarrow_pos = getTemplatePos(hwnd, cap, TEMPLATES["elixir2"], scr_shot, threshold=0.8)
-            if not wheelbarrow_pos:
-                find_wheelbarrow = False
-                # 识别斧子
-                for filename in os.listdir(TEMPLATES["axe"]):
-                    axe = None
-                    with open(os.path.join(TEMPLATES["axe"], filename), "rb") as f:
-                        axe = cv2.cvtColor(pickle.load(f), cv2.COLOR_BGR2RGB)
-                    wheelbarrow_pos = getTemplatePos(hwnd, cap, axe, scr_shot, threshold=0.75)
-                    if wheelbarrow_pos:
-                        find_wheelbarrow = True
-                        break
-                if not find_wheelbarrow:
-                    logger.warning("未找到圣水车")
-                    return
+            find_wheelbarrow = False
+            # 识别斧子
+            print("识别斧子")
+            for filename in os.listdir(TEMPLATES["axe"]):
+                axe = None
+                with open(os.path.join(TEMPLATES["axe"], filename), "rb") as f:
+                    axe = cv2.cvtColor(pickle.load(f), cv2.COLOR_BGR2RGB)
+                wheelbarrow_pos = getTemplatePos(hwnd, cap, axe, scr_shot, threshold=0.75, record_fail=False)
+                if wheelbarrow_pos:
+                    find_wheelbarrow = True
+                    break
+            if not find_wheelbarrow:
+                logger.warning("未找到圣水车")
+                return
         click(hwnd, wheelbarrow_pos)
         time.sleep(1)
         logger.info("识别收集和关闭按钮")
@@ -95,10 +93,10 @@ def attack(
         for i in range(search_times):
             attack_pos = getOcrPos(hwnd, cap, ocr, "进攻", crop=(0.5, 1.0, 0.0, 0.5))
             if not attack_pos:
-                logThenExit("未找到进攻按钮", "no_attack.png")
+                logThenExit("未找到进攻按钮")
             click(hwnd, attack_pos)
             if not waitUntilMatchThenClick(hwnd, cap, TEMPLATES["search"], timeout=2):
-                logThenExit("未找到搜索按钮", "no_search.png")
+                logThenExit("未找到搜索按钮")
             if matchOpponent(hwnd, cap, ocr):
                 # 找到对手
                 find = True
@@ -106,7 +104,7 @@ def attack(
             else:  # 规定时间内未找到对手
                 logger.warning(f"规定时间内没匹配到，退出重新搜索对手：[{i + 1}/{search_times}]")
                 if not matchTemplateThenClick(hwnd, cap, TEMPLATES["cancel"]):
-                    logThenExit("未找到取消按钮", "no_cancel.png")
+                    logThenExit("未找到取消按钮")
             time.sleep(3)
         if find:
             logger.info("开始进攻")
@@ -162,7 +160,7 @@ def attack(
     # 第一阶段进攻
     placeArms(number)
     with tqdm(total=BATTLE_TIME, unit="秒") as pbar:
-        start_time = time.time()
+        phase1_start = time.time()
         last_time = time.time()
         # 等待战斗结束
         while True:
@@ -170,7 +168,7 @@ def attack(
                 return
             if matchTemplateThenClick(hwnd, cap, TEMPLATES["backhome"]):
                 pbar.close()
-                logger.info(f"第1阶段进攻结束，用时：{time.time() - start_time:.1f}秒")
+                logger.info(f"第1阶段进攻结束，用时：{time.time() - phase1_start:.1f}秒")
                 logger.info("回营")
                 return
             if getOcrPos(hwnd, cap, ocr, "开战倒计时", crop=(0.0, 1 / 3, 1 / 3, 2 / 3)):
@@ -180,30 +178,30 @@ def attack(
             time.sleep(2)
             pbar.update(round(time.time() - last_time, 1))
             last_time = time.time()
-            pbar.set_description(f"第1阶段进攻中：{(time.time() - start_time):.1f}/{BATTLE_TIME}秒")
+            pbar.set_description(f"第1阶段进攻中：{(time.time() - phase1_start):.1f}/{BATTLE_TIME}秒")
 
-    logger.info(f"第1阶段进攻结束，用时：{time.time() - start_time:.1f}秒")
+    logger.info(f"第1阶段进攻结束，用时：{time.time() - phase1_start:.1f}秒")
     logger.info("进入二阶段")
     time.sleep(2)
     if event and event.is_set():
         return
     placeArms(number)
     with tqdm(total=BATTLE_TIME, unit="秒") as pbar:
-        start_time = time.time()
+        phase2_start = time.time()
         last_time = time.time()
         while True:
             if event and event.is_set():
                 return
             if matchTemplateThenClick(hwnd, cap, TEMPLATES["backhome"]):
                 pbar.close()
-                logger.info(f"第2阶段进攻结束，用时：{time.time() - start_time:.1f}秒")
+                logger.info(f"第2阶段进攻结束，用时：{time.time() - phase2_start:.1f}秒")
                 logger.info("回营")
                 return
             matchTemplateThenClick(hwnd, cap, TEMPLATES["machine_skill"], 'bottom')
             time.sleep(2)
             pbar.update(round(time.time() - last_time, 1))
             last_time = time.time()
-            pbar.set_description(f"第2阶段进攻中：{(time.time() - start_time):.1f}/{BATTLE_TIME}秒")
+            pbar.set_description(f"第2阶段进攻中：{(time.time() - phase2_start):.1f}/{BATTLE_TIME}秒")
 
 
 def attackThenRetreat(
@@ -220,10 +218,10 @@ def attackThenRetreat(
         for i in range(search_times):
             attack_pos = getOcrPos(hwnd, cap, ocr, "进攻", crop=(0.5, 1.0, 0.0, 0.5))
             if not attack_pos:
-                logThenExit("未找到进攻按钮", "no_attack.png")
+                logThenExit("未找到进攻按钮")
             click(hwnd, attack_pos)
             if not waitUntilMatchThenClick(hwnd, cap, TEMPLATES["search"], timeout=2):
-                logThenExit("未找到搜索按钮", "no_search.png")
+                logThenExit("未找到搜索按钮")
             if matchOpponent(hwnd, cap, ocr):
                 # 找到对手
                 find = True
@@ -231,7 +229,7 @@ def attackThenRetreat(
             else:  # 规定时间内未找到对手
                 logger.warning(f"规定时间内没匹配到，退出重新搜索对手：[{i + 1}/{search_times}]")
                 if not matchTemplateThenClick(hwnd, cap, TEMPLATES["cancel"]):
-                    logThenExit("未找到取消按钮", "no_cancel.png")
+                    logThenExit("未找到取消按钮")
             time.sleep(3)
         if find:
             logger.info("开始进攻")
@@ -258,11 +256,11 @@ def attackThenRetreat(
                 logger.info("回营")
                 return
             else:
-                logThenExit("未找到回营按钮", "no_backhome.png")
+                logThenExit("未找到回营按钮")
         else:
-            logThenExit("未找到确认按钮", "giveup_confirm.png")
+            logThenExit("未找到确认按钮")
     else:
-        logThenExit("未找到放弃按钮", "no_giveup.png")
+        logThenExit("未找到放弃按钮")
 
 
 if __name__ == "__main__":

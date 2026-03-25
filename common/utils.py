@@ -13,8 +13,50 @@ import os
 import sys
 from paddleocr import PaddleOCR
 import win32ui
+import threading
 
 from common.log import logger
+
+
+# 模板匹配失败时，记录最近一次匹配失败的详细信息
+class MatchFailRecord:
+    def __init__(self):
+        self.data = None
+        self.lock = threading.Lock()
+
+    def record(self, template, max_val, threshold):
+        with self.lock:
+            # 通过对象 id 反查文件路径
+            path = template_path_registry[id(template)]
+            self.data = {
+                'path': path,
+                'max_val': round(max_val, 4),
+                'threshold': threshold,
+            }
+
+    def get(self) -> dict | None:
+        # 返回最近一次失败的诊断信息，若从未失败则返回None
+        return self.data
+
+    def clear(self):
+        self.data = None
+
+
+# 模板到文件路径的映射
+template_path_registry: dict[int, str] = {}
+last_match_fail = MatchFailRecord()
+
+
+def registerTemplate(template: np.ndarray, path: str):
+    # key_words.py 加载图片时调用
+    template_path_registry[id(template)] = path
+
+
+def loadImg(path: str):
+    """加载图片并注册路径，供匹配失败诊断使用。"""
+    img = cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2RGB)
+    registerTemplate(img, path)
+    return img
 
 
 class WindowCapture:
@@ -122,9 +164,10 @@ def getTemplatePos(
     cap: WindowCapture,
     template: np.ndarray,
     scr_shot: np.ndarray = None,
-    threshold: float = 0.95,
+    threshold: float = 0.85,
     offset: str = "mid",
     crop: tuple[float, float, float, float] = (0.0, 1.0, 0.0, 1.0),
+    record_fail: bool = True
 ):
     w, h = getWindowSize(hwnd)
     if scr_shot is None:
@@ -134,6 +177,8 @@ def getTemplatePos(
     _, max_val, _, max_loc = cv2.minMaxLoc(res)
     # print(max_val)
     if max_val < threshold:
+        if record_fail:
+            last_match_fail.record(template, max_val, threshold)
         return None
     else:
         x, y = max_loc
@@ -250,15 +295,19 @@ def waitUntilOcrThenClick(
 
 def logThenExit(
     msg: str,
-    img_name: str,
-    quit: bool = True
+    fail_msg=None,
+    quit: bool = True,
+    match_fail=True
 ):
-    # saveScreen(img_name)
+    if match_fail:
+        fail = last_match_fail.get() if fail_msg is None else fail_msg
+        if fail:
+            msg = (f"{msg}（{fail['path']}），可信度={fail['max_val']} < 阈值={fail['threshold']}")
     if quit:
-        logger.critical(msg)
+        logger.opt(depth=1).critical(msg)
         raise RuntimeError(msg)
     else:
-        logger.warning(msg)
+        logger.opt(depth=1).warning(msg)
 
 
 def resourcePath(relative_path: str) -> str:
@@ -312,7 +361,7 @@ def formatInt(n: int) -> str:
 
 
 if __name__ == "__main__":
-    points = generateGaussianPoints(848, 744, 1367, 355, 1108, 550, num_points=11)
+    points = generateGaussianPoints(848, 744, 1367, 355, num_points=11)
     from matplotlib import pyplot as plt
     plt.figure(figsize=(10, 10))
     for pt in points:

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>619</width>
-    <height>533</height>
+    <width>799</width>
+    <height>430</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -505,13 +505,13 @@
                </widget>
               </item>
               <item>
-               <spacer name="horizontalSpacer_2">
+               <spacer name="horizontalSpacer_13">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
-                  <width>90</width>
+                  <width>40</width>
                   <height>20</height>
                  </size>
                 </property>
@@ -1008,6 +1008,13 @@
       </widget>
      </widget>
     </item>
+    <item>
+     <widget class="QPushButton" name="reload_btn">
+      <property name="text">
+       <string>重新加载图片</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -1015,7 +1022,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>619</width>
+     <width>799</width>
      <height>22</height>
     </rect>
    </property>

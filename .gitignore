@@ -8,3 +8,5 @@ dist/
 *.spec
 config.json
 screenshots/
+custom_arms.json
+custom_arms/
