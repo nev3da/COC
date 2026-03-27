@@ -18,6 +18,7 @@ from paddleocr import PaddleOCR
 import time
 import sys
 import importlib
+from tqdm import tqdm
 
 from common.utils import *
 from day_world import key_words as day_keywords
@@ -48,10 +49,14 @@ class ScreenShotThread(Thread):
         while self.running:
             timestamp = time.time()
             frame = self.cap.grab()
-            self.frames.append((timestamp, frame))
+            # 存入时压缩
+            encoded = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])[1]
+            self.frames.append((timestamp, encoded))
 
             # 删除一分钟之前的图片
             while self.frames and (timestamp - self.frames[0][0]) > 60:
+                total_bytes = sum(frame.nbytes for _, frame in self.frames)
+                print(f"frames 总内存: {total_bytes / 1024 / 1024:.2f} MB ({len(self.frames)} 帧)")
                 self.frames.popleft()
             if self.interval > 0:
                 time.sleep(self.interval)
@@ -63,16 +68,19 @@ class ScreenShotThread(Thread):
         frames = list(self.frames)
         if not frames:
             return
-        height, width, _ = frames[0][1].shape
+        height, width, _ = cv2.imdecode(frames[0][1], cv2.IMREAD_COLOR).shape
         timestamps = [t for t, _ in frames]
         total_time = timestamps[-1] - timestamps[0]
         fps = len(timestamps) / total_time if total_time > 0 else 1
 
         output_path = os.path.join(self.save_dir, f'{time.strftime("%Y-%m-%d_%H-%M-%S")}.mp4')
         writer = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (width, height))
-        for _, frame in frames:
-            bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-            writer.write(bgr)
+        # 解压后拼接
+        with tqdm(frames) as pbar:
+            for idx, (_, encoded) in enumerate(pbar):
+                frame = cv2.cvtColor(cv2.imdecode(encoded, cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
+                writer.write(frame)
+                pbar.set_description(f"正在保存视频：{idx}/{len(frames)}")
         writer.release()
 
 
@@ -121,7 +129,7 @@ class NightThread(QThread):
                     if i < battle_num1:
                         night_script.attack(self.hwnd, self.cap, self.ocr, self.unit, self.number, self.e)
                     else:
-                        night_script.attackThenRetreat(self.hwnd, self.cap, self.ocr, self.unit)
+                        night_script.attackThenRetreat(self.hwnd, self.cap, self.ocr, self.unit, self.e)
                     if self.e.is_set():
                         break
                     time.sleep(4)

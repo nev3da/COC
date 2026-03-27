@@ -2,7 +2,6 @@
 作者：Yuanl
 日期：2024年12月22日
 """
-import cv2
 import os
 from common.utils import resourcePath, loadImg
 

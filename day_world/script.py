@@ -166,7 +166,7 @@ def attack(
     while True:
         find = False
         if not matchOcrThenClick(hwnd, cap, ocr, "进攻", (2 / 3, 1, 0, 1 / 3)):
-            logThenExit("未找到进攻按钮", match_fail=False)
+            logThenExit("未找到进攻按钮", fail_type='ocr')
         if not waitUntilMatchThenClick(hwnd, cap, TEMPLATES["search"], timeout=2, crop=(0, 1, 0, 1 / 3)):
             logThenExit("未找到搜索按钮")
         # 如果吃了部落城堡免费增援的蛋糕

@@ -175,7 +175,7 @@ def getTemplatePos(
         scr_shot = scr_shot[round(h * crop[0]):round(h * crop[1]), round(w * crop[2]):round(w * crop[3]), :]
     res = cv2.matchTemplate(scr_shot, template, cv2.TM_CCOEFF_NORMED)
     _, max_val, _, max_loc = cv2.minMaxLoc(res)
-    # print(max_val)
+    # print(max_val, template_path_registry.get(id(template), "未知路径"))
     if max_val < threshold:
         if record_fail:
             last_match_fail.record(template, max_val, threshold)
@@ -297,9 +297,9 @@ def logThenExit(
     msg: str,
     fail_msg=None,
     quit: bool = True,
-    match_fail=True
+    fail_type='template'
 ):
-    if match_fail:
+    if fail_type == 'template':
         fail = last_match_fail.get() if fail_msg is None else fail_msg
         if fail:
             msg = (f"{msg}（{fail['path']}），可信度={fail['max_val']} < 阈值={fail['threshold']}")
