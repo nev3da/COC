@@ -55,8 +55,6 @@ class ScreenShotThread(Thread):
 
             # 删除一分钟之前的图片
             while self.frames and (timestamp - self.frames[0][0]) > 60:
-                total_bytes = sum(frame.nbytes for _, frame in self.frames)
-                print(f"frames 总内存: {total_bytes / 1024 / 1024:.2f} MB ({len(self.frames)} 帧)")
                 self.frames.popleft()
             if self.interval > 0:
                 time.sleep(self.interval)
