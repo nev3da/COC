@@ -164,7 +164,7 @@ def getTemplatePos(
     cap: WindowCapture,
     template: np.ndarray,
     scr_shot: np.ndarray = None,
-    threshold: float = 0.85,
+    threshold: float = 0.90,
     offset: str = "mid",
     crop: tuple[float, float, float, float] = (0.0, 1.0, 0.0, 1.0),
     record_fail: bool = True
@@ -232,10 +232,11 @@ def matchTemplateThenClick(
     hwnd: int,
     cap: WindowCapture,
     template: np.ndarray,
+    threshold: float = 0.90,
     offset: str = 'mid',
     crop: tuple[float, float, float, float] = (0.0, 1.0, 0.0, 1.0),
 ):
-    pos = getTemplatePos(hwnd, cap, template, offset=offset, crop=crop)
+    pos = getTemplatePos(hwnd, cap, template, threshold=threshold, offset=offset, crop=crop)
     if pos:
         click(hwnd, pos)
         time.sleep(1)
@@ -262,6 +263,7 @@ def waitUntilMatchThenClick(
     hwnd: int,
     cap: WindowCapture,
     template: np.ndarray,
+    threshold: float = 0.90,
     interval: float = 0,
     timeout: float = 10.0,
     crop: tuple[float, float, float, float] = (0.0, 1.0, 0.0, 1.0),
@@ -270,7 +272,7 @@ def waitUntilMatchThenClick(
     while True:
         if time.time() - start_time > timeout:
             return False
-        if matchTemplateThenClick(hwnd, cap, template, crop=crop):
+        if matchTemplateThenClick(hwnd, cap, template, threshold=threshold, crop=crop):
             return True
         time.sleep(interval)
 

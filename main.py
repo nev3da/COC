@@ -247,7 +247,7 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
             logger.exception(f"加载配置出错: {e}")
 
     def initResources(self):
-        print("加载模型中...")
+        logger.info("加载模型中...")
         self.ocr = PaddleOCR(
             use_textline_orientation=False,
             use_doc_orientation_classify=False,
@@ -359,7 +359,7 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
         if self.screenshot_thread:
             self.screenshot_thread.stop()
             self.screenshot_thread.join()
-            logger.success("正在保存视频....")
+            # logger.success("正在保存视频....")
 
             self.screenshot_thread.imagesToVideo()
             logger.success("已保存视频")

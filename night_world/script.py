@@ -29,7 +29,6 @@ def collectElixir(
         if not wheelbarrow_pos:
             find_wheelbarrow = False
             # 识别斧子
-            print("识别斧子")
             for filename in os.listdir(TEMPLATES["axe"]):
                 axe = None
                 with open(os.path.join(TEMPLATES["axe"], filename), "rb") as f:
@@ -189,9 +188,10 @@ def attack(
                     logger.info("回营")
                     return False
                 if (phase == 1) and getOcrPos(hwnd, cap, ocr, "开战倒计时", crop=(0.0, 1 / 3, 1 / 3, 2 / 3)):
+                    pbar.close()
                     logger.info(f"第{phase}阶段进攻结束，用时：{time.time() - phase_start:.1f}秒")
                     return True
-                matchTemplateThenClick(hwnd, cap, TEMPLATES["machine_skill"], 'bottom')
+                matchTemplateThenClick(hwnd, cap, TEMPLATES["machine_skill"], offset='bottom')
                 time.sleep(2)
                 now = time.time()
                 pbar.update(round(now - last_time, 1))

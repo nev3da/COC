@@ -2,10 +2,10 @@
 作者：Yuanl
 日期：2025年7月25日
 """
-import cv2
 import json
 import os
 from common.utils import resourcePath, loadImg
+from common.log import logger
 
 BATTLE_TIME = 300
 DIR = 'day_world'
@@ -61,7 +61,7 @@ if os.path.exists(CUSTOM_ARM_JSON):
         key = os.path.splitext(troop['filename'])[0]
         img_path = resourcePath(os.path.join(CUSTOM_ARM_DIR, troop['filename']))
         if not os.path.exists(img_path):
-            print(f"[custom_arms] 警告：自定义图片不存在，已跳过：{img_path}")
+            logger.warning(f"[custom_arms] 警告：自定义图片不存在，已跳过：{img_path}")
             continue
         TEMPLATES[key] = loadImg(img_path)
         CUSTOM_TROOPS.append((key, troop.get('count', 1)))

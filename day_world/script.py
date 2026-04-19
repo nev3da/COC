@@ -140,7 +140,7 @@ def checkCastleCake(
     hwnd: int,
     cap: WindowCapture,
 ):
-    if waitUntilMatchThenClick(hwnd, cap, TEMPLATES["castle_cake"], timeout=1, crop=(0.5, 1, 2 / 3, 1)):
+    if waitUntilMatchThenClick(hwnd, cap, TEMPLATES["castle_cake"], threshold=0.95, timeout=1, crop=(0.5, 1, 2 / 3, 1)):
         if waitUntilMatchThenClick(hwnd, cap, TEMPLATES["castle_confirm"], timeout=2):
             time.sleep(1)
             # 可能没有设置援军
