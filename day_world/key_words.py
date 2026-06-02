@@ -57,14 +57,15 @@ if os.path.exists(CUSTOM_ARM_JSON):
     with open(CUSTOM_ARM_JSON, 'r', encoding='utf-8') as f:
         custom_cfg = json.load(f)
     for troop in custom_cfg.get('custom_troops', []):
-        # 去掉 .png 作为键名
-        key = os.path.splitext(troop['filename'])[0]
-        img_path = resourcePath(os.path.join(CUSTOM_ARM_DIR, troop['filename']))
-        if not os.path.exists(img_path):
-            logger.warning(f"[custom_arms] 警告：自定义图片不存在，已跳过：{img_path}")
-            continue
-        TEMPLATES[key] = loadImg(img_path)
-        CUSTOM_TROOPS.append((key, troop.get('count', 1)))
+        if troop['filename']:
+            # 去掉 .png 作为键名
+            key = os.path.splitext(troop['filename'])[0]
+            img_path = resourcePath(os.path.join(CUSTOM_ARM_DIR, troop['filename']))
+            if not os.path.exists(img_path):
+                logger.warning(f"[custom_arms] 警告：自定义图片不存在，已跳过：{img_path}")
+                continue
+            TEMPLATES[key] = loadImg(img_path)
+            CUSTOM_TROOPS.append((key, troop.get('count', 1)))
 
 
 if __name__ == '__main__':

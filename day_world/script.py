@@ -173,7 +173,7 @@ def attack(
         checkCastleCake(hwnd, cap)
         if not waitUntilMatchThenClick(hwnd, cap, TEMPLATES["attack"], timeout=2, crop=(2 / 3, 1, 2 / 3, 1)):
             logThenExit("未找到进攻按钮")
-        # 找到对手
+        # 寻找对手
         while matchOpponent(hwnd, cap):
             if event and event.is_set():
                 return
@@ -198,8 +198,8 @@ def attack(
     # 开打
     zoomOut(hwnd)
     shiftScreen(hwnd, mid_pos, -3)
-    queen_pos = (870, 695)
-    bbrking_pos = (1400, 300)
+    queen_pos = (860, 658)
+    bbrking_pos = (1390, 290)
     warden_pos = ((queen_pos[0] + bbrking_pos[0]) // 2, (queen_pos[1] + bbrking_pos[1]) // 2)
     siege_weapon = True
     # 选攻城武器

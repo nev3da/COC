@@ -8,5 +8,4 @@ dist/
 *.spec
 config.json
 screenshots/
-custom_arms.json
-custom_arms/
+day_world/custom_arms/*

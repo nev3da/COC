@@ -62,7 +62,7 @@ def matchOpponent(
     hwnd: int,
     cap: WindowCapture,
     ocr: PaddleOCR,
-    time_limit: float = 20.0,
+    time_limit: float = 10.0,
     event: threading.Event = None
 ):
     time.sleep(1)
