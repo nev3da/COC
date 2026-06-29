@@ -80,7 +80,7 @@ def buildArmy(
 def matchOpponent(
     hwnd: int,
     cap: WindowCapture,
-    time_limit: float = 20.0
+    time_limit: float = 10.0
 ):
     time.sleep(1)
     start_time = time.time()
@@ -101,6 +101,8 @@ def detectOpponentResources(
     elixir: int = 0,
     oil: int = 0
 ):
+    if gold + elixir + oil == 0:
+        return True
     time.sleep(1)
     w, h = getWindowSize(hwnd)
     scr = cap.grab()[round(h * 1 / 7) - 10:round(h * 1 / 3) - 30, :round(1 / 7 * w), :]
@@ -186,12 +188,19 @@ def attack(
                 logger.info('搜索下一个对手')
                 if not matchTemplateThenClick(hwnd, cap, TEMPLATES["next"]):
                     logThenExit("未找到搜索下一个对手按钮")
-        # 规定时间内未找到对手
+        # 规定时间内未找到对手（也可能是刚到时间就搜索到了）
         if not find:
-            logger.warning(f"规定时间内没匹配到，退出重新搜索对手")
             if not matchTemplateThenClick(hwnd, cap, TEMPLATES["backhome"]):
-                logThenExit("未找到回营按钮")
-            time.sleep(3)
+                # 没找到回营按钮，说明应该找到了对手
+                time.sleep(5)
+                if getTemplatePos(hwnd, cap, TEMPLATES["next"]):
+                    # 确实找到了对手，继续进攻
+                    logger.info("开始进攻")
+                    break
+                else:
+                    # 没找到对手，也没找到回营按钮，说明界面异常了
+                    logThenExit("未找到回营按钮")
+            time.sleep(15)
         else:
             logger.info("开始进攻")
             break

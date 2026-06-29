@@ -89,7 +89,7 @@ def searchOpponentUntilFind(
     有时候会一直搜不到人，所以要判断一下，如果连续搜了几次都搜不到人，就等一会再搜
     """
     while True:
-        for i in range(search_times):
+        for _ in range(search_times):
             attack_pos = getOcrPos(hwnd, cap, ocr, "进攻", crop=(0.5, 1.0, 0.0, 0.5))
             if not attack_pos:
                 logThenExit("未找到进攻按钮")
@@ -102,9 +102,13 @@ def searchOpponentUntilFind(
             if event and event.is_set():
                 return
             # 规定时间内未找到对手，取消后继续尝试
-            logger.warning(f"规定时间内没匹配到，退出重新搜索对手：[{i + 1}/{search_times}]")
             if not matchTemplateThenClick(hwnd, cap, TEMPLATES["cancel"]):
-                logThenExit("未找到取消按钮")
+                time.sleep(3)
+                if getOcrPos(hwnd, cap, ocr, "开战倒计时", crop=(0.0, 1 / 3, 1 / 3, 2 / 3)):
+                    logger.info("开始进攻")
+                    return
+                else:
+                    logThenExit("未找到取消按钮")
             time.sleep(3)
         logger.warning(f"连续{search_times}次未找到对手，等半分钟再搜")
         time.sleep(30)

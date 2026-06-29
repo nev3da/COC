@@ -53,8 +53,8 @@ class ScreenShotThread(Thread):
             encoded = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])[1]
             self.frames.append((timestamp, encoded))
 
-            # 删除一分钟之前的图片
-            while self.frames and (timestamp - self.frames[0][0]) > 60:
+            # 删除半分钟之前的图片
+            while self.frames and (timestamp - self.frames[0][0]) > 30:
                 self.frames.popleft()
             if self.interval > 0:
                 time.sleep(self.interval)
@@ -193,7 +193,7 @@ class DayThread(QThread):
                 day_script.attack(self.hwnd, self.cap, self.ocr, self.number, (self.gold, self.elixir, self.oil), self.e)
                 if self.e.is_set():
                     break
-                time.sleep(4)
+                time.sleep(10)
                 # 检查是否弹出宝箱（战场寻宝）
                 day_script.receiveChest(self.hwnd, self.cap)
                 # 检查是否弹出胜利之星奖励
