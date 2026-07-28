@@ -25,6 +25,7 @@ TEMPLATES = {
     'cancel': loadImg(resourcePath(os.path.join(CONTROL_DIR, 'cancel.png'))),
     'giveup': loadImg(resourcePath(os.path.join(CONTROL_DIR, 'giveup.png'))),
     'giveup_confirm': loadImg(resourcePath(os.path.join(CONTROL_DIR, 'giveup_confirm.png'))),
+    'speedup': loadImg(resourcePath(os.path.join(CONTROL_DIR, 'speedup.png'))),
 
     'war_machine': loadImg(resourcePath(os.path.join(ARM_DIR, 'warmachine.png'))),
     'helicopter': loadImg(resourcePath(os.path.join(ARM_DIR, 'helicopter.png'))),

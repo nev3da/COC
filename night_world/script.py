@@ -196,7 +196,9 @@ def attack(
                     logger.info(f"第{phase}阶段进攻结束，用时：{time.time() - phase_start:.1f}秒")
                     return True
                 matchTemplateThenClick(hwnd, cap, TEMPLATES["machine_skill"], offset='bottom')
-                time.sleep(2)
+                time.sleep(1)
+                matchTemplateThenClick(hwnd, cap, TEMPLATES["speedup"], crop=(0.0, 1, 2 / 3, 1.0))
+                time.sleep(1)
                 now = time.time()
                 pbar.update(round(now - last_time, 1))
                 last_time = now
