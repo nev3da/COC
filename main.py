@@ -196,6 +196,8 @@ class DayThread(QThread):
                 time.sleep(10)
                 # 检查是否弹出宝箱（战场寻宝）
                 day_script.receiveChest(self.hwnd, self.cap)
+                # 检查是否弹出卡包（战场寻卡）
+                day_script.receiveTicket(self.hwnd, self.cap)
                 # 检查是否弹出胜利之星奖励
                 logger.info("检查胜利之星")
                 matchTemplateThenClick(self.hwnd, self.cap, day_keywords.TEMPLATES["victory_star"])

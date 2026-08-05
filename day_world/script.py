@@ -349,7 +349,7 @@ def attack(
                     fail_msg = last_match_fail.get()
             time.sleep(1)
             # 屏幕上出现了回营的按钮，可能是战斗自动结束，也可能是上述代码点击了“放弃战斗/结束战斗”，并确认后才出现的
-            if matchTemplateThenClick(hwnd, cap, TEMPLATES["victory_back"]) or matchTemplateThenClick(hwnd, cap, TEMPLATES["receive_chest"]):
+            if matchTemplateThenClick(hwnd, cap, TEMPLATES["victory_back"]) or matchTemplateThenClick(hwnd, cap, TEMPLATES["receive"]):
                 pbar.close()
                 logger.info("战斗结束，回营")
                 return
@@ -372,17 +372,33 @@ def receiveChest(
     hwnd: int,
     cap: WindowCapture,
 ):
-    hammer_pos = getTemplatePos(hwnd, cap, TEMPLATES["chest_hammer"])
+    hammer_pos = getTemplatePos(hwnd, cap, TEMPLATES["chest"])
     if hammer_pos:
         for _ in range(4):
             click(hwnd, hammer_pos)
             time.sleep(0.5)
         time.sleep(1)
-        if waitUntilMatchThenClick(hwnd, cap, TEMPLATES["continue_chest"], timeout=5):
+        if waitUntilMatchThenClick(hwnd, cap, TEMPLATES["chest_continue"], timeout=5):
             logger.info("宝箱已领取并关闭")
             time.sleep(5)
         else:
             logThenExit("未找到领取宝箱继续按钮")
+
+def receiveTicket(
+    hwnd: int,
+    cap: WindowCapture,
+):
+    sword_pos = getTemplatePos(hwnd, cap, TEMPLATES["ticket"])
+    if sword_pos:
+        for _ in range(3):
+            click(hwnd, sword_pos)
+            time.sleep(0.5)
+        time.sleep(1)
+        if waitUntilMatchThenClick(hwnd, cap, TEMPLATES["ticket_continue"], timeout=5):
+            logger.info("卡包已领取并关闭")
+            time.sleep(5)
+        else:
+            logThenExit("未找到领取卡包继续按钮")
 
 
 if __name__ == "__main__":
