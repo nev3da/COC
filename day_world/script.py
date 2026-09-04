@@ -207,8 +207,8 @@ def attack(
     # 开打
     zoomOut(hwnd)
     shiftScreen(hwnd, mid_pos, -3)
-    queen_pos = (860, 658)
-    bbrking_pos = (1390, 290)
+    queen_pos = (870, 700)
+    bbrking_pos = (1425, 275)
     warden_pos = ((queen_pos[0] + bbrking_pos[0]) // 2, (queen_pos[1] + bbrking_pos[1]) // 2)
     siege_weapon = True
     # 选攻城武器
@@ -221,15 +221,7 @@ def attack(
         else:
             logThenExit("未找到切换按钮，无法切换到攻城气球", quit=False)
             siege_weapon = False
-    # 放女王
-    queen = getTemplatePos(hwnd, cap, TEMPLATES["archer_queen"])
-    if queen:
-        click(hwnd, queen)
-        time.sleep(0.5)
-        click(hwnd, queen_pos)
-        # 放技能（穿云箭）
-        time.sleep(0.5)
-        click(hwnd, queen)
+
     # 放蛮王
     bbrking = getTemplatePos(hwnd, cap, TEMPLATES["bbrking"])
     if bbrking:
@@ -251,6 +243,15 @@ def attack(
         for pos in dragons_pos:
             click(hwnd, pos)
             time.sleep(0.1)
+    # 放女王
+        queen = getTemplatePos(hwnd, cap, TEMPLATES["archer_queen"])
+        if queen:
+            click(hwnd, queen)
+            time.sleep(0.5)
+            click(hwnd, queen_pos)
+            # 放技能（穿云箭）
+            time.sleep(0.5)
+            click(hwnd, queen)
     # 放自定义兵种
     for (arm_name, count) in CUSTOM_TROOPS:
         arm_pos = generateGaussianPoints(*queen_pos, *bbrking_pos, num_points=count)
