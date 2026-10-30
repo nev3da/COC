@@ -90,14 +90,14 @@ def searchOpponentUntilFind(
     """
     while True:
         for _ in range(search_times):
-            attack_pos = getOcrPos(hwnd, cap, ocr, "进攻", crop=(0.5, 1.0, 0.0, 0.5))
+            attack_pos = getOcrPos(hwnd, cap, ocr, "战斗", crop=(0.5, 1.0, 0.0, 0.5))
             if not attack_pos:
-                logThenExit("未找到进攻按钮")
+                logThenExit("未找到战斗按钮")
             click(hwnd, attack_pos)
             if not waitUntilMatchThenClick(hwnd, cap, TEMPLATES["search"], timeout=2):
                 logThenExit("未找到搜索按钮")
             if matchOpponent(hwnd, cap, ocr, event=event):
-                logger.info("开始进攻")
+                logger.info("开始战斗")
                 return
             if event and event.is_set():
                 return
@@ -105,7 +105,7 @@ def searchOpponentUntilFind(
             if not matchTemplateThenClick(hwnd, cap, TEMPLATES["cancel"]):
                 time.sleep(3)
                 if getOcrPos(hwnd, cap, ocr, "开战倒计时", crop=(0.0, 1 / 3, 1 / 3, 2 / 3)):
-                    logger.info("开始进攻")
+                    logger.info("开始战斗")
                     return
                 else:
                     logThenExit("未找到取消按钮")
@@ -173,7 +173,7 @@ def attack(
 
     def runPhase(phase: int) -> bool:
         """
-        进攻阶段的等待循环。
+        战斗阶段的等待循环。
         返回 True 表示进入下一阶段。
         返回 False 表示战斗结束。
         """
@@ -188,12 +188,12 @@ def attack(
                     logThenExit(f"超过战斗时间上限（{BATTLE_TIME}秒），可能界面出了问题", fail_type='none')
                 if matchTemplateThenClick(hwnd, cap, TEMPLATES["backhome"]):
                     pbar.close()
-                    logger.info(f"第{phase}阶段进攻结束，用时：{time.time() - phase_start:.1f}秒")
+                    logger.info(f"第{phase}阶段战斗结束，用时：{time.time() - phase_start:.1f}秒")
                     logger.info("回营")
                     return False
                 if (phase == 1) and getOcrPos(hwnd, cap, ocr, "开战倒计时", crop=(0.0, 1 / 3, 1 / 3, 2 / 3)):
                     pbar.close()
-                    logger.info(f"第{phase}阶段进攻结束，用时：{time.time() - phase_start:.1f}秒")
+                    logger.info(f"第{phase}阶段战斗结束，用时：{time.time() - phase_start:.1f}秒")
                     return True
                 matchTemplateThenClick(hwnd, cap, TEMPLATES["machine_skill"], offset='bottom')
                 time.sleep(1)
@@ -202,7 +202,7 @@ def attack(
                 now = time.time()
                 pbar.update(round(now - last_time, 1))
                 last_time = now
-                pbar.set_description(f"第{phase}阶段进攻中：{now - phase_start:.1f}/{BATTLE_TIME}秒")
+                pbar.set_description(f"第{phase}阶段战斗中：{now - phase_start:.1f}/{BATTLE_TIME}秒")
 
     if not runPhase(1):
         return

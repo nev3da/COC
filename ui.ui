@@ -636,7 +636,7 @@
                  <number>10</number>
                 </property>
                 <property name="value">
-                 <number>30</number>
+                 <number>120</number>
                 </property>
                </widget>
               </item>
@@ -933,7 +933,7 @@
                        </font>
                       </property>
                       <property name="text">
-                       <string>10 000</string>
+                       <string>5 000</string>
                       </property>
                       <property name="alignment">
                        <set>Qt::AlignCenter</set>

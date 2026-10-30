@@ -123,7 +123,7 @@ class NightThread(QThread):
                     logger.info(f"距离收集圣水还有[{battle_total - i}/{battle_total}]场战斗")
                     # 缩小视野至最小
                     zoomOut(self.hwnd)
-                    # 进攻
+                    # 战斗
                     if i < battle_num1:
                         night_script.attack(self.hwnd, self.cap, self.ocr, self.unit, self.number, self.e)
                     else:
@@ -183,13 +183,13 @@ class DayThread(QThread):
             start_time = time.time()
             battle_num = 1
             # 练兵
-            day_script.buildArmy(self.hwnd, self.cap, self.number)
+            day_script.buildArmy(self.hwnd, self.cap, self.ocr, self.number)
             while True:
                 if self.e.is_set():
                     break
                 logger.info(f'即将开始第{battle_num}场战斗')
                 battle_num += 1
-                # 进攻
+                # 战斗
                 day_script.attack(self.hwnd, self.cap, self.ocr, self.number, (self.gold, self.elixir, self.oil), self.e)
                 if self.e.is_set():
                     break

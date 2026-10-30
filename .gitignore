@@ -1,8 +1,7 @@
 __pycache__/
 log/
-test.py
+test.*
 .idea/
-no_*.png
 build/
 dist/
 *.spec

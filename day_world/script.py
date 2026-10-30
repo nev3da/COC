@@ -14,10 +14,13 @@ from common.utils import *
 def buildArmy(
     hwnd: int,
     cap: WindowCapture,
+    ocr: PaddleOCR,
     number: int = 16
 ):
+    if not matchOcrThenClick(hwnd, cap, ocr, "战斗", (2 / 3, 1, 0, 1 / 3)):
+        logThenExit("未找到战斗按钮", fail_type='ocr')
     if not matchTemplateThenClick(hwnd, cap, TEMPLATES["build_army"]):
-        logThenExit("未找到建造按钮")
+        logThenExit("未找到编辑军队按钮")
     time.sleep(1)
     # 删除所有部队
     click(hwnd, (1543, 208))
@@ -74,7 +77,9 @@ def buildArmy(
     # 结束建造
     if not waitUntilMatchThenClick(hwnd, cap, TEMPLATES["build_end"], timeout=3):
         logThenExit("未找到结束建造按钮")
-    time.sleep(1)
+    time.sleep(0.5)
+    click(hwnd, (1200, 500))
+    time.sleep(2)
 
 
 def matchOpponent(
@@ -167,14 +172,14 @@ def attack(
     mid_pos = (w // 2, h // 2)
     while True:
         find = False
-        if not matchOcrThenClick(hwnd, cap, ocr, "进攻", (2 / 3, 1, 0, 1 / 3)):
-            logThenExit("未找到进攻按钮", fail_type='ocr')
+        if not matchOcrThenClick(hwnd, cap, ocr, "战斗", (2 / 3, 1, 0, 1 / 3)):
+            logThenExit("未找到战斗按钮", fail_type='ocr')
         if not waitUntilMatchThenClick(hwnd, cap, TEMPLATES["search"], timeout=2, crop=(0, 1, 0, 1 / 3)):
             logThenExit("未找到搜索按钮")
         # 如果吃了部落城堡免费增援的蛋糕
         checkCastleCake(hwnd, cap)
         if not waitUntilMatchThenClick(hwnd, cap, TEMPLATES["attack"], timeout=2, crop=(2 / 3, 1, 2 / 3, 1)):
-            logThenExit("未找到进攻按钮")
+            logThenExit("未找到战斗按钮")
         # 寻找对手
         while matchOpponent(hwnd, cap):
             if event and event.is_set():
@@ -194,15 +199,15 @@ def attack(
                 # 没找到回营按钮，说明应该找到了对手
                 time.sleep(5)
                 if getTemplatePos(hwnd, cap, TEMPLATES["next"]):
-                    # 确实找到了对手，继续进攻
-                    logger.info("开始进攻")
+                    # 确实找到了对手，继续战斗
+                    logger.info("开始战斗")
                     break
                 else:
                     # 没找到对手，也没找到回营按钮，说明界面异常了
                     logThenExit("未找到回营按钮")
             time.sleep(15)
         else:
-            logger.info("开始进攻")
+            logger.info("开始战斗")
             break
     # 开打
     zoomOut(hwnd)
@@ -234,8 +239,10 @@ def attack(
         click(hwnd, dragon_duke)
         time.sleep(0.5)
         click(hwnd, bbrking_pos)
-    # 放龙
+    # 放龙，先放最右上角的
     dragons_pos = generateGaussianPoints(*queen_pos, *bbrking_pos, num_points=number)
+    top_right_index = min(range(len(dragons_pos)), key=lambda i: dragons_pos[i][1])
+    dragons_pos[0], dragons_pos[top_right_index] = dragons_pos[top_right_index], dragons_pos[0]
     dragon = getTemplatePos(hwnd, cap, TEMPLATES["dragon"])
     if dragon:
         click(hwnd, dragon)
@@ -300,7 +307,11 @@ def attack(
             time.sleep(0.1)
 
     # 等待几秒
-    time.sleep(5)
+    time.sleep(2)
+    # 飞龙公爵放技能
+    if dragon_duke:
+        click(hwnd, dragon_duke)
+    time.sleep(2)
     # 大守护者放技能（金身）
     if grand_warden:
         click(hwnd, grand_warden)
@@ -309,21 +320,15 @@ def attack(
     if royal_champion:
         click(hwnd, royal_champion)
     # 再等待几秒
-    time.sleep(3)
+    time.sleep(1)
     # 蛮王放技能（足球）
     if bbrking:
         click(hwnd, bbrking)
-    # 再等待几秒
-    time.sleep(2)
+    time.sleep(0.5)
     # 亡灵王子放技能（减速法球）
     if minion_prince:
         click(hwnd, minion_prince)
-    # 再等待几秒
-    time.sleep(2)
-    # 飞龙公爵放技能
-    if dragon_duke:
-        click(hwnd, dragon_duke)
-
+    
     with tqdm(total=BATTLE_TIME, unit="秒") as pbar:
         start_time = time.time()
         last_time = time.time()
@@ -331,6 +336,7 @@ def attack(
         destruction_rate = 0
         fail_msg = None
         while True:
+            click(hwnd, (1170, 440))
             if event and event.is_set():
                 pbar.close()
                 return
@@ -366,7 +372,7 @@ def attack(
                         destruction_time = time.time()
             pbar.update(round(time.time() - last_time, 1))
             last_time = time.time()
-            pbar.set_description(f"进攻中：{(time.time() - start_time):.1f}/{BATTLE_TIME}秒， 当前摧毁率：{destruction_rate}%")
+            pbar.set_description(f"战斗中：{(time.time() - start_time):.1f}/{BATTLE_TIME}秒， 当前摧毁率：{destruction_rate}%")
 
 
 def receiveChest(
