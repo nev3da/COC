@@ -29,7 +29,9 @@ TEMPLATES = {
     'giveup': loadImg(resourcePath(os.path.join(CONTROL_DIR, 'giveup.png'))),
     'end_fight_confirm': loadImg(resourcePath(os.path.join(CONTROL_DIR, 'end_fight_confirm.png'))),
     'victory_back': loadImg(resourcePath(os.path.join(CONTROL_DIR, 'victory_back.png'))),
-    'victory_star': loadImg(resourcePath(os.path.join(CONTROL_DIR, 'victory_star.png'))),
+    'victory_star_bar': loadImg(resourcePath(os.path.join(CONTROL_DIR, 'victory_star_bar.png'))),
+    'victory_star_continue': loadImg(resourcePath(os.path.join(CONTROL_DIR, 'victory_star_continue.png'))),
+    'victory_star_receive': loadImg(resourcePath(os.path.join(CONTROL_DIR, 'victory_star_receive.png'))),
     'attack': loadImg(resourcePath(os.path.join(CONTROL_DIR, 'attack.png'))),
     'receive': loadImg(resourcePath(os.path.join(CONTROL_DIR, 'receive.png'))),
     'chest': loadImg(resourcePath(os.path.join(CONTROL_DIR, 'chest.png'))),
@@ -39,6 +41,7 @@ TEMPLATES = {
     'castle_cancel': loadImg(resourcePath(os.path.join(CONTROL_DIR, 'castle_cancel.png'))),
     'ticket': loadImg(resourcePath(os.path.join(CONTROL_DIR, 'ticket.png'))),
     'ticket_continue': loadImg(resourcePath(os.path.join(CONTROL_DIR, 'ticket_continue.png'))),
+    'speed_up': loadImg(resourcePath(os.path.join(CONTROL_DIR, 'speed_up.png'))),
 
     'archer_queen': loadImg(resourcePath(os.path.join(ARM_DIR, 'archer_queen.png'))),
     'bbrking': loadImg(resourcePath(os.path.join(ARM_DIR, 'bbrking.png'))),

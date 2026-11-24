@@ -193,14 +193,15 @@ class DayThread(QThread):
                 day_script.attack(self.hwnd, self.cap, self.ocr, self.number, (self.gold, self.elixir, self.oil), self.e)
                 if self.e.is_set():
                     break
-                time.sleep(10)
+                time.sleep(5)
                 # 检查是否弹出宝箱（战场寻宝）
                 day_script.receiveChest(self.hwnd, self.cap)
                 # 检查是否弹出卡包（战场寻卡）
                 day_script.receiveTicket(self.hwnd, self.cap)
-                # 检查是否弹出胜利之星奖励
-                logger.info("检查胜利之星")
-                matchTemplateThenClick(self.hwnd, self.cap, day_keywords.TEMPLATES["victory_star"])
+                # 检查是否弹出胜利之星奖励(5⭐)
+                matchTemplateThenClick(self.hwnd, self.cap, day_keywords.TEMPLATES["victory_star_receive"])
+                time.sleep(4)
+                day_script.receiveVictoryStar(self.hwnd, self.cap)
                 if self.e.is_set():
                     break
                 # 判断是否到达执行时间
@@ -223,6 +224,8 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
         super(MainUi, self).__init__()
         self.script_thread: QThread = None
         self.screenshot_thread: ScreenShotThread = None
+        self.cap_script: WindowCapture = None
+        self.cap_record: WindowCapture = None
         self.setupUi(self)
         self.loadConfig()
         self.initResources()
@@ -260,20 +263,45 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
             text_recognition_model_dir=resourcePath("common/paddlemodels/PP-OCRv5_mobile_rec_infer"),
             enable_mkldnn=False,    # 防止多线程时交替产生Unknown Exception
         )
-        self.hwnd_prtsc = win32gui.FindWindow(None, self.window_name_label.text())
-        self.hwnd_operate = win32gui.FindWindowEx(self.hwnd_prtsc, None, None, None)
-        self.window_offset = getWindowSize(self.hwnd_prtsc)[1] - getWindowSize(self.hwnd_operate)[1]
-        self.cap_script = WindowCapture(self.hwnd_prtsc, self.window_offset)
-        self.cap_record = WindowCapture(self.hwnd_prtsc, self.window_offset)
+
+    def initWindowResources(self) -> bool:
+        """每次开始前按当前窗口名称查找模拟器，失败时允许重试。"""
+        try:
+            window_name = self.window_name_label.text().strip()
+            if not window_name:
+                raise RuntimeError("请先填写模拟器窗口名称")
+            hwnd_parent = win32gui.FindWindow(None, window_name)
+            if not hwnd_parent:
+                raise RuntimeError(f"未找到模拟器窗口：{window_name}，请打开模拟器后重试")
+            hwnd_operate = win32gui.FindWindowEx(hwnd_parent, None, None, None)
+            if not hwnd_operate:
+                raise RuntimeError("未找到模拟器操作窗口，请等待模拟器启动完成后重试")
+
+            for cap in (self.cap_script, self.cap_record):
+                if cap is not None:
+                    cap.release()
+            self.cap_script = self.cap_record = None
+            self.hwnd_operate = hwnd_operate
+            self.cap_script = WindowCapture(hwnd_operate)
+            self.cap_record = WindowCapture(hwnd_operate)
+        except Exception as e:
+            logger.exception(f"初始化模拟器窗口失败：{e}")
+            for cap in (self.cap_script, self.cap_record):
+                if cap is not None:
+                    cap.release()
+            self.cap_script = self.cap_record = None
+            return False
+        return True
 
     def setLogics(self):
         def nightScriptEvent():
             if self.night_btn.text() == "开始":
+                if not self.initWindowResources():
+                    return
                 self.event.clear()
                 self.night_btn.setText("停止")
                 self.tabWidget.tabBar().setEnabled(False)
                 self.reload_btn.setEnabled(False)
-                self.cap_script.initResources()
                 self.nightBegin()
                 self.screenShotBegin()
             else:
@@ -283,11 +311,12 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
 
         def dayScriptEvent():
             if self.day_btn.text() == "开始":
+                if not self.initWindowResources():
+                    return
                 self.event.clear()
                 self.day_btn.setText("停止")
                 self.tabWidget.tabBar().setEnabled(False)
                 self.reload_btn.setEnabled(False)
-                self.cap_script.initResources()
                 self.dayBegin()
                 self.screenShotBegin()
             else:
@@ -346,7 +375,6 @@ class MainUi(QMainWindow, ui.Ui_MainWindow):
 
     def screenShotBegin(self):
         # 启动截图线程
-        self.cap_record.initResources()
         self.screenshot_thread = ScreenShotThread(self.cap_record, interval=0.05)
         self.screenshot_thread.start()
 

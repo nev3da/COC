@@ -3,6 +3,7 @@
 日期：2024年12月24日
 """
 import ctypes
+from ctypes import wintypes
 import win32con
 import win32gui
 import win32api
@@ -16,6 +17,11 @@ import win32ui
 import threading
 
 from common.log import logger
+
+
+_print_window = ctypes.windll.user32.PrintWindow
+_print_window.argtypes = (wintypes.HWND, wintypes.HDC, wintypes.UINT)
+_print_window.restype = wintypes.BOOL
 
 
 # 模板匹配失败时，记录最近一次匹配失败的详细信息
@@ -60,12 +66,18 @@ def loadImg(path: str):
 
 
 class WindowCapture:
-    def __init__(self, hwnd: int, window_offset: int = 0):
+    def __init__(self, hwnd: int):
         self.hwnd = hwnd
-        self.window_offset = window_offset
+        self.hwndDC = None
+        self.mfcDC = None
+        self.saveDC = None
+        self.saveBitMap = None
+        self.oldBitMap = None
         self.initResources()
 
     def initResources(self):
+        # 允许启动脚本时重新初始化，先释放上一次分配的资源。
+        self.release()
         self.w, self.h = getWindowSize(self.hwnd)
         # DC
         self.hwndDC = win32gui.GetWindowDC(self.hwnd)
@@ -74,11 +86,13 @@ class WindowCapture:
         # Bitmap
         self.saveBitMap = win32ui.CreateBitmap()
         self.saveBitMap.CreateCompatibleBitmap(self.mfcDC, self.w, self.h)
-        self.saveDC.SelectObject(self.saveBitMap)
+        self.oldBitMap = self.saveDC.SelectObject(self.saveBitMap)
 
     def grab(self) -> np.ndarray:
         # 后台截图
-        result = ctypes.windll.user32.PrintWindow(
+        if self.saveDC is None:
+            raise RuntimeError("WindowCapture resources have been released")
+        result = _print_window(
             self.hwnd,
             self.saveDC.GetSafeHdc(),
             2
@@ -89,13 +103,24 @@ class WindowCapture:
         bmpstr = self.saveBitMap.GetBitmapBits(True)
         img = np.frombuffer(bmpstr, dtype=np.uint8)
         img.shape = (self.h, self.w, 4)
-        return cv2.cvtColor(img[self.window_offset:, :, :3], cv2.COLOR_BGR2RGB)
+        return cv2.cvtColor(img[:, :, :3], cv2.COLOR_BGR2RGB)
 
     def release(self):
-        win32gui.DeleteObject(self.saveBitMap.GetHandle())
-        self.saveDC.DeleteDC()
-        self.mfcDC.DeleteDC()
-        win32gui.ReleaseDC(self.hwnd, self.hwndDC)
+        # 位图必须先从内存 DC 中选出，才能删除。
+        if self.oldBitMap is not None:
+            self.saveDC.SelectObject(self.oldBitMap)
+            self.oldBitMap = None
+        if self.saveBitMap is not None:
+            win32gui.DeleteObject(self.saveBitMap.GetHandle())
+            self.saveBitMap = None
+        if self.saveDC is not None:
+            self.saveDC.DeleteDC()
+            self.saveDC = None
+        # mfcDC 仅包装 GetWindowDC 返回的句柄，不应调用 DeleteDC。
+        self.mfcDC = None
+        if self.hwndDC is not None:
+            win32gui.ReleaseDC(self.hwnd, self.hwndDC)
+            self.hwndDC = None
 
 
 def getWindowSize(
@@ -121,6 +146,34 @@ def zoomOut(
         win32gui.PostMessage(hwnd, win32con.WM_MOUSEWHEEL, wparam, lparam)
         time.sleep(0.05)
 
+def drag(
+    hwnd: int,
+    start_pos: tuple[int, int],
+    end_pos: tuple[int, int],
+    duration: float = 0.5,
+):
+    x1, y1 = start_pos
+    x2, y2 = end_pos
+    steps = 30
+    current_pos = start_pos
+
+    # 移动到起点
+    win32gui.PostMessage(hwnd, win32con.WM_MOUSEMOVE, 0, win32api.MAKELONG(x1, y1))
+    time.sleep(0.02)
+    # 按下左键
+    win32gui.PostMessage(hwnd, win32con.WM_LBUTTONDOWN, win32con.MK_LBUTTON, win32api.MAKELONG(x1, y1))
+    try:
+        time.sleep(0.02)
+        # 按住左键，逐步移动到终点
+        for i in range(1, steps + 1):
+            x = round(x1 + (x2 - x1) * i / steps)
+            y = round(y1 + (y2 - y1) * i / steps)
+            current_pos = (x, y)
+            win32gui.PostMessage(hwnd, win32con.WM_MOUSEMOVE, win32con.MK_LBUTTON, win32api.MAKELONG(x, y))
+            time.sleep(max(duration, 0) / steps)
+    finally:
+        # 松开左键
+        win32gui.PostMessage(hwnd, win32con.WM_LBUTTONUP, 0, win32api.MAKELONG(*current_pos))
 
 def shiftScreen(
     hwnd: int,

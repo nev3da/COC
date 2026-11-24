@@ -31,7 +31,11 @@ def buildArmy(
     time.sleep(1)
     build_dragon_pos = getTemplatePos(hwnd, cap, TEMPLATES["build_dragon"])
     if not build_dragon_pos:
-        logThenExit("未找到建造龙按钮")
+        drag(hwnd, (750, 650), (450, 650))
+        time.sleep(1)
+        build_dragon_pos = getTemplatePos(hwnd, cap, TEMPLATES["build_dragon"])
+        if not build_dragon_pos:
+            logThenExit("未找到建造龙按钮")
     for _ in range(number):
         click(hwnd, build_dragon_pos)
         time.sleep(0.1)
@@ -77,8 +81,8 @@ def buildArmy(
     # 结束建造
     if not waitUntilMatchThenClick(hwnd, cap, TEMPLATES["build_end"], timeout=3):
         logThenExit("未找到结束建造按钮")
-    time.sleep(0.5)
-    click(hwnd, (1200, 500))
+    time.sleep(1)
+    click(hwnd, (1500, 500))
     time.sleep(2)
 
 
@@ -328,7 +332,8 @@ def attack(
     # 亡灵王子放技能（减速法球）
     if minion_prince:
         click(hwnd, minion_prince)
-    
+    time.sleep(0.5)
+    matchTemplateThenClick(hwnd, cap, TEMPLATES["speed_up"], crop=(0.0, 1, 2 / 3, 1.0))
     with tqdm(total=BATTLE_TIME, unit="秒") as pbar:
         start_time = time.time()
         last_time = time.time()
@@ -336,7 +341,7 @@ def attack(
         destruction_rate = 0
         fail_msg = None
         while True:
-            click(hwnd, (1170, 440))
+            # click(hwnd, (1170, 440))
             if event and event.is_set():
                 pbar.close()
                 return
@@ -374,6 +379,21 @@ def attack(
             last_time = time.time()
             pbar.set_description(f"战斗中：{(time.time() - start_time):.1f}/{BATTLE_TIME}秒， 当前摧毁率：{destruction_rate}%")
 
+def receiveVictoryStar(
+    hwnd: int,
+    cap: WindowCapture,
+):
+    bar_pos = getTemplatePos(hwnd, cap, TEMPLATES["victory_star_bar"])
+    if bar_pos:
+        for _ in range(4):
+            click(hwnd, bar_pos)
+            time.sleep(0.5)
+        time.sleep(1)
+        if waitUntilMatchThenClick(hwnd, cap, TEMPLATES["victory_star_continue"], timeout=5):
+            logger.info("胜利之星已领取并关闭")
+            time.sleep(5)
+        else:
+            logThenExit("未找到领取胜利之星继续按钮")
 
 def receiveChest(
     hwnd: int,
